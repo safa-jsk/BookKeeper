@@ -1,19 +1,20 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
 import axios from 'axios';
+import { Link } from 'react-router-dom';
 
 function BookList() {
   const [books, setBooks] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    axios.get('http://localhost:5000/api/books') // Adjust if your endpoint differs
+    axios.get('http://localhost:5000/api/books')
       .then(res => {
-        setBooks(res.data);
-        setLoading(false);
+        setBooks(res.data);  // Set books data
+        setLoading(false);    // Stop loading
       })
       .catch(err => {
-        setBooks([]);
+        console.error('Error fetching books:', err);
+        setBooks([]);         // Set empty array in case of error
         setLoading(false);
       });
   }, []);
@@ -33,7 +34,6 @@ function BookList() {
                 <h5 className="card-title">{book.title}</h5>
                 <p className="card-text"><strong>Author:</strong> {book.author}</p>
                 <p className="card-text"><small>{book.genre}</small></p>
-                {/* Add more details as needed */}
                 <Link to={`/books/${book._id}`} className="btn btn-primary btn-sm mt-2">
                   View Details
                 </Link>

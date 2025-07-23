@@ -1,20 +1,85 @@
 const express = require('express');
 const Book = require('../models/Book');
+const Review = require('../models/Review');
+const mongoose = require('mongoose');  // Added for ObjectId validation
 const router = express.Router();
 
+// Get all books
 router.get('/', async (req, res) => {
-  const books = await Book.find({});
-  res.json(books);
+  try {
+    const books = await Book.find();  // Fetch all books
+    res.json(books);                  // Return the books as JSON
+  } catch (err) {
+    res.status(500).json({ error: 'Error fetching books' });
+  }
 });
 
-module.exports = router;
-
+// Get a single book by ID
 router.get('/:id', async (req, res) => {
+  const { id } = req.params;
+
+  // Validate ObjectId before querying
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(400).json({ error: 'Invalid ID' });
+  }
+
   try {
-    const book = await Book.findById(req.params.id);
-    if (!book) return res.status(404).json({ error: 'Book not found' });
-    res.json(book);
+    const book = await Book.findById(id).populate('reviews');  // Populate reviews with full review data
+    if (!book) {
+      return res.status(404).json({ error: 'Book not found' });
+    }
+    res.json(book);  // Send the book data, including populated reviews
   } catch (err) {
     res.status(500).json({ error: 'Server error' });
   }
 });
+
+// Add review for a book
+router.post('/:id/reviews', async (req, res) => {
+  const { user, rating, comment } = req.body;
+  try {
+    const book = await Book.findById(req.params.id);
+    if (!book) return res.status(404).json({ error: 'Book not found' });
+
+    const review = new Review({
+      user,
+      rating,
+      comment
+    });
+    await review.save();
+
+    // Push the newly created review's ObjectId to the book's reviews array
+    book.reviews.push(review._id);  // Save review reference in book
+    book.rating = await calculateAverageRating(book._id);  // Recalculate average rating for the book
+    await book.save();
+
+    // Populate the reviews in the book and send back the updated book with reviews
+    const updatedBook = await Book.findById(req.params.id).populate('reviews');
+    res.json(updatedBook);  // Return updated book with all reviews
+  } catch (err) {
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// Helper function to calculate the average rating for a book
+async function calculateAverageRating(bookId) {
+  const book = await Book.findById(bookId).populate('reviews');
+  const reviews = book.reviews;  // All the populated reviews
+
+  const totalRating = reviews.reduce((acc, review) => acc + review.rating, 0);
+  return totalRating / reviews.length;  // Return average rating
+}
+
+// Get reviews for a book
+router.get('/:id/reviews', async (req, res) => {
+  try {
+    const book = await Book.findById(req.params.id).populate('reviews');  // Populate reviews for the book
+    if (!book) return res.status(404).json({ error: 'Book not found' });
+
+    res.json(book.reviews);  // Return reviews
+  } catch (err) {
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+module.exports = router;

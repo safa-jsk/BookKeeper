@@ -13,8 +13,8 @@ function App() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/browse" element={<BookList />} />
-        {<Route path="/trending" element={<Trending />} />}
-        {<Route path="/books/:id" element={<BookDetail />} />}
+        <Route path="/trending" element={<Trending />} />
+        <Route path="/books/:id" element={<BookDetail />} />
       </Routes>
     </Router>
   );
