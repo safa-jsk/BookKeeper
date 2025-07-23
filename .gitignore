@@ -1,0 +1,16 @@
+# Node
+node_modules/
+npm-debug.log
+.env
+
+# React
+frontend/build/
+frontend/node_modules/
+frontend/.env
+
+# OS/system
+.DS_Store
+Thumbs.db
+
+# Others
+coverage/
