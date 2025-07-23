@@ -1,18 +1,23 @@
-import React, { useEffect, useState } from "react";
-import axios from "axios";
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import Navbar from './components/Navbar';
+import Home from './pages/Home';
+import BookList from './components/BookList';
+import BookDetail from './pages/BookDetail';
+import Trending from './pages/Trending';
 
 function App() {
-  const [message, setMessage] = useState("");
-  useEffect(() => {
-    axios.get("http://localhost:5000/")
-      .then(res => setMessage(res.data))
-      .catch(err => setMessage("API error"));
-  }, []);
   return (
-    <div>
-      <h1>BookKeeper</h1>
-      <p>Backend says: {message}</p>
-    </div>
+    <Router>
+      <Navbar />
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/browse" element={<BookList />} />
+        {<Route path="/trending" element={<Trending />} />}
+        {<Route path="/books/:id" element={<BookDetail />} />}
+      </Routes>
+    </Router>
   );
 }
+
 export default App;
