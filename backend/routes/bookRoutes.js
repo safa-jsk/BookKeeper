@@ -42,23 +42,17 @@ router.get('/', async (req, res) => {
 
 // Get a single book by ID
 router.get('/:id', async (req, res) => {
-  const { id } = req.params;
-
-  // Validate ObjectId before querying
-  if (!mongoose.Types.ObjectId.isValid(id)) {
-    return res.status(400).json({ error: 'Invalid ID' });
-  }
-
   try {
-    const book = await Book.findById(id).populate('reviews');  // Populate reviews with full review data
+    const book = await Book.findById(req.params.id).populate('reviews');  // Ensure reviews are populated
     if (!book) {
       return res.status(404).json({ error: 'Book not found' });
     }
-    res.json(book);  // Send the book data, including populated reviews
+    res.json(book);  // Send back the populated book data
   } catch (err) {
     res.status(500).json({ error: 'Server error' });
   }
 });
+
 
 // Add review for a book
 router.post('/:id/reviews', async (req, res) => {
@@ -108,8 +102,5 @@ router.get('/:id/reviews', async (req, res) => {
     res.status(500).json({ error: 'Server error' });
   }
 });
-
-
-
 
 module.exports = router;

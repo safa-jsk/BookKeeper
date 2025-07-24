@@ -17,6 +17,7 @@ function BookDetail() {
   useEffect(() => {
     axios.get(`http://localhost:5000/api/books/${id}`)
       .then(res => {
+        console.log(res.data);  // Check if reviews and image are populated correctly
         setBook(res.data);
         setLoading(false);
       })
@@ -50,7 +51,7 @@ function BookDetail() {
         <Card sx={{ maxWidth: 200 }}>
           <CardMedia
             component="img"
-            image={book.image || '/default-book-cover.jpg'}
+            image={book.image ? `/${book.image}` : '/default-book-cover.jpg'}
             alt={book.title}
             height="300"
           />
