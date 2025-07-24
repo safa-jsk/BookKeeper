@@ -79,13 +79,14 @@ router.post('/:id/reviews', async (req, res) => {
     book.rating = await calculateAverageRating(book._id);  // Recalculate average rating for the book
     await book.save();
 
-    // Populate the reviews in the book and send back the updated book with reviews
-    const updatedBook = await Book.findById(req.params.id).populate('reviews');
-    res.json(updatedBook);  // Return updated book with all reviews
+    // Return updated book with reviews
+    await book.populate('reviews');
+    res.json(book);  // Return updated book with all reviews
   } catch (err) {
     res.status(500).json({ error: 'Server error' });
   }
 });
+
 
 // Helper function to calculate the average rating for a book
 async function calculateAverageRating(bookId) {

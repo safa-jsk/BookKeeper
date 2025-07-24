@@ -3,8 +3,9 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Home from './pages/Home';
 import BookList from './components/BookList';
-import BookDetail from './pages/BookDetail';
+import BookDetail from './components/BookDetail';
 import Trending from './pages/Trending';
+import './styles/styles.css';
 
 function App() {
   return (

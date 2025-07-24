@@ -1,79 +1,93 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { Card, CardContent, CardMedia, Typography, Button, Grid, Box } from '@mui/material';
 import { Link } from 'react-router-dom';
 
 function BookList() {
   const [books, setBooks] = useState([]);
-  const [searchQuery, setSearchQuery] = useState('');  // State for the search query
+  const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
 
-  // Fetch books (either all or based on search query)
   const fetchBooks = async (query = '') => {
     setLoading(true);
     try {
-      // If there's no query, fetch all books; otherwise, search for books
       const response = await axios.get(`http://localhost:5000/api/books/search?query=${query}`);
       setBooks(response.data);
     } catch (err) {
-      console.error('Error fetching books:', err);
       setBooks([]);
     } finally {
       setLoading(false);
     }
   };
 
-
   useEffect(() => {
-    fetchBooks();  // Fetch all books initially (empty query)
-  }, []);  // Fetch all books on initial load
+    fetchBooks();  // Fetch all books initially
+  }, []);
 
-  // Handle the search form submit
   const handleSearchSubmit = (e) => {
     e.preventDefault();
-    fetchBooks(searchQuery);  // Fetch books based on the search query
+    fetchBooks(searchQuery);  // Fetch books based on search query
   };
 
   if (loading) return <div className="text-center mt-5"><div className="spinner-border text-primary" /></div>;
 
   return (
-    <div className="container mt-4">
-      <h2 className="mb-4">Browse Books</h2>
+    <Box sx={{ p: 3 }}>
+      <Typography variant="h4" component="h1" gutterBottom align="center">
+        Browse Books
+      </Typography>
 
       {/* Search Form */}
-      <form onSubmit={handleSearchSubmit}>
-        <div className="mb-3">
-          <input
-            type="text"
-            className="form-control"
-            placeholder="Search by title, author, genre..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}  // Update search query
-          />
-        </div>
-        <button type="submit" className="btn btn-primary">Search</button>
+      <form onSubmit={handleSearchSubmit} className="search-form mb-4" style={{ textAlign: 'center' }}>
+        <input
+          type="text"
+          placeholder="Search by title, author, or genre"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          style={{
+            padding: '10px',
+            width: '70%',
+            borderRadius: '4px',
+            border: '1px solid #ddd',
+            marginRight: '10px'
+          }}
+        />
+        <Button variant="contained" color="primary" type="submit" sx={{ padding: '10px 20px' }}>
+          Search
+        </Button>
       </form>
 
-      <div className="row mt-4">
-        {books.length === 0 ? (
-          <p className="text-center">No books found.</p>
-        ) : (
-          books.map((book) => (
-            <div key={book._id} className="col-md-4 mb-4">
-              <div className="card h-100 shadow-sm">
-                <div className="card-body">
-                  <h5 className="card-title">{book.title}</h5>
-                  <p className="card-text"><strong>Author:</strong> {book.author}</p>
-                  <p className="card-text"><small>{book.genre}</small></p>
-                  <Link to={`/books/${book._id}`} className="btn btn-primary btn-sm mt-2">
-                    View Details
-                  </Link>
-                </div>
-              </div>
-            </div>
-          ))
-        )}
-      </div>
-    </div>
+      {/* Book Grid */}
+      <Grid container spacing={3}>
+        {books.length === 0 && !loading && <Typography variant="h6" align="center">No books found.</Typography>}
+        {books.map((book) => (
+          <Grid item xs={12} sm={6} md={4} key={book._id} sx={{ marginBottom: 4 }}>
+            <Card sx={{ maxWidth: 345, height: '100%' }}>
+              <CardMedia
+                component="img"
+                height="200"
+                image={book.image || '/default-book-cover.jpg'}
+                alt={book.title}
+              />
+              <CardContent sx={{ flexGrow: 1 }}>
+                <Typography gutterBottom variant="h6" component="div">
+                  {book.title}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  <strong>Author:</strong> {book.author}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  <strong>Genre:</strong> {book.genre}
+                </Typography>
+              </CardContent>
+              <Button size="small" component={Link} to={`/books/${book._id}`} color="primary">
+                View Details
+              </Button>
+            </Card>
+          </Grid>
+        ))}
+      </Grid>
+    </Box>
   );
 }
 
