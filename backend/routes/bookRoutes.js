@@ -4,6 +4,32 @@ const Review = require('../models/Review');
 const mongoose = require('mongoose');  // Added for ObjectId validation
 const router = express.Router();
 
+// Search books by title, author, or genre
+router.get('/search', async (req, res) => {
+  const { query } = req.query;  // Get the search query from the query parameters
+
+  try {
+    let books;
+    if (query) {
+      // Search for books if there's a query
+      books = await Book.find({
+        $or: [
+          { title: { $regex: query, $options: 'i' } }, // Case-insensitive search for title
+          { author: { $regex: query, $options: 'i' } }, // Case-insensitive search for author
+          { genre: { $regex: query, $options: 'i' } },  // Case-insensitive search for genre
+        ]
+      });
+    } else {
+      // Fetch all books if no query is provided (default behavior)
+      books = await Book.find();
+    }
+
+    res.json(books);  // Return the search results or all books
+  } catch (err) {
+    res.status(500).json({ error: 'Server error while searching books' });
+  }
+});
+
 // Get all books
 router.get('/', async (req, res) => {
   try {
@@ -81,5 +107,8 @@ router.get('/:id/reviews', async (req, res) => {
     res.status(500).json({ error: 'Server error' });
   }
 });
+
+
+
 
 module.exports = router;
