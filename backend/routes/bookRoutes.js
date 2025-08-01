@@ -5,30 +5,41 @@ const mongoose = require('mongoose');  // Added for ObjectId validation
 const router = express.Router();
 
 // Search books by title, author, or genre
+// In bookRoutes.js
 router.get('/search', async (req, res) => {
-  const { query } = req.query;  // Get the search query from the query parameters
-
+  const { query, filter } = req.query;
   try {
     let books;
-    if (query) {
-      // Search for books if there's a query
+    if (!query) {
+      books = await Book.find();
+    } else if (!filter || filter === 'none') {
+      // Default: search across all
       books = await Book.find({
         $or: [
-          { title: { $regex: query, $options: 'i' } }, // Case-insensitive search for title
-          { author: { $regex: query, $options: 'i' } }, // Case-insensitive search for author
-          { genre: { $regex: query, $options: 'i' } },  // Case-insensitive search for genre
+          { title: { $regex: query, $options: 'i' } },
+          { author: { $regex: query, $options: 'i' } },
+          { genre: { $regex: query, $options: 'i' } }
         ]
       });
+    } else if (filter === 'title') {
+      books = await Book.find({ title: { $regex: query, $options: 'i' } });
+    } else if (filter === 'author') {
+      books = await Book.find({ author: { $regex: query, $options: 'i' } });
+    } else if (filter === 'genre') {
+      books = await Book.find({ genre: { $regex: query, $options: 'i' } });
+    } else if (filter === 'rating') {
+      // For rating, treat query as minimum rating
+      const minRating = parseFloat(query) || 0;
+      books = await Book.find({ rating: { $gte: minRating } });
     } else {
-      // Fetch all books if no query is provided (default behavior)
       books = await Book.find();
     }
-
-    res.json(books);  // Return the search results or all books
+    res.json(books);
   } catch (err) {
     res.status(500).json({ error: 'Server error while searching books' });
   }
 });
+
 
 // Get all books
 router.get('/', async (req, res) => {
