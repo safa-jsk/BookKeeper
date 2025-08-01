@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { TextField, Button, MenuItem, Box, Typography, Alert } from '@mui/material';
+import { TextField, Button, MenuItem, Box, Typography, Alert, Grid } from '@mui/material';
 
 const cities = [
     'Dhaka', 'Chattogram', 'Rajshahi', 'Barishal', 'Sylhet',
@@ -15,7 +15,6 @@ function Register({ onRegister }) {
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
 
-    // Simple password validation function
     function validatePassword(pw) {
         return pw.length >= 8 && /[0-9]/.test(pw) && /[A-Z]/.test(pw);
     }
@@ -28,7 +27,6 @@ function Register({ onRegister }) {
         e.preventDefault();
         setError('');
         setSuccess('');
-        // Basic client-side validation
         if (!validatePassword(form.password)) {
             setError('Password must be at least 8 characters, include an uppercase letter and a number.');
             return;
@@ -52,29 +50,66 @@ function Register({ onRegister }) {
     };
 
     return (
-        <Box sx={{ maxWidth: 400, mx: 'auto', mt: 5, p: 3, border: '1px solid #ddd', borderRadius: 2 }}>
+        <Box sx={{ maxWidth: 550, mx: 'auto', mt: 3, p: 3, border: '1px solid #ddd', borderRadius: 2 }}>
             <Typography variant="h5" mb={2}>Register</Typography>
             <form onSubmit={handleSubmit} autoComplete="off">
-                <TextField label="First Name" name="firstName" value={form.firstName} onChange={handleChange} fullWidth required sx={{ mb: 2 }} />
-                <TextField label="Last Name" name="lastName" value={form.lastName} onChange={handleChange} fullWidth required sx={{ mb: 2 }} />
-                <TextField label="Email" name="email" type="email" value={form.email} onChange={handleChange} fullWidth required sx={{ mb: 2 }} />
-                <TextField label="Password" name="password" type="password" value={form.password} onChange={handleChange} fullWidth required sx={{ mb: 2 }}
-                    helperText="Min 8 chars, include number & uppercase letter" />
-                <TextField label="Confirm Password" name="confirmPassword" type="password" value={form.confirmPassword} onChange={handleChange} fullWidth required sx={{ mb: 2 }} />
-                <TextField
-                    select label="Gender" name="gender" value={form.gender} onChange={handleChange}
-                    fullWidth required sx={{ mb: 2 }}>
-                    <MenuItem value="Male">Male</MenuItem>
-                    <MenuItem value="Female">Female</MenuItem>
-                </TextField>
-                <TextField label="Date of Birth" name="dob" type="date" value={form.dob} onChange={handleChange} fullWidth required sx={{ mb: 2 }}
-                    InputLabelProps={{ shrink: true }} />
-                <TextField
-                    select label="City" name="city" value={form.city} onChange={handleChange}
-                    fullWidth required sx={{ mb: 2 }}>
-                    {cities.map(city => <MenuItem key={city} value={city}>{city}</MenuItem>)}
-                </TextField>
-                <Button type="submit" variant="contained" color="primary" fullWidth>Register</Button>
+                <Grid container spacing={2}>
+                    <Grid item xs={12} sm={6}>
+                        <TextField label="First Name" name="firstName" value={form.firstName} onChange={handleChange} fullWidth required />
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                        <TextField label="Last Name" name="lastName" value={form.lastName} onChange={handleChange} fullWidth required />
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                        <TextField label="Email" name="email" type="email" value={form.email} onChange={handleChange} fullWidth required />
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                        <TextField
+                            select
+                            label="Gender"
+                            name="gender"
+                            value={form.gender}
+                            onChange={handleChange}
+                            fullWidth
+                            required
+                            sx={{
+                                minWidth: { sm: 180, xs: '100%' },   // Fix width on desktop, responsive on mobile
+                                maxWidth: { sm: 180, xs: '100%' },
+                            }}
+                        >
+                            <MenuItem value="Male">Male</MenuItem>
+                            <MenuItem value="Female">Female</MenuItem>
+                        </TextField>
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                        <TextField label="Date of Birth" name="dob" type="date" value={form.dob} onChange={handleChange} fullWidth required InputLabelProps={{ shrink: true }} />
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                        <TextField
+                            select
+                            label="City"
+                            name="city"
+                            value={form.city}
+                            onChange={handleChange}
+                            fullWidth
+                            required
+                            sx={{
+                                minWidth: { sm: 180, xs: '100%' },
+                                maxWidth: { sm: 180, xs: '100%' },
+                            }}
+                        >
+                            {cities.map(city => <MenuItem key={city} value={city}>{city}</MenuItem>)}
+                        </TextField>
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                        <TextField label="Password" name="password" type="password" value={form.password} onChange={handleChange} fullWidth required
+                            helperText="Min 8 chars, include number & uppercase letter" />
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                        <TextField label="Confirm Password" name="confirmPassword" type="password" value={form.confirmPassword} onChange={handleChange} fullWidth required />
+                    </Grid>
+                </Grid>
+                <Button type="submit" variant="contained" color="primary" fullWidth sx={{ mt: 2 }}>Register</Button>
                 {error && <Alert severity="error" sx={{ mt: 2 }}>{error}</Alert>}
                 {success && <Alert severity="success" sx={{ mt: 2 }}>{success}</Alert>}
             </form>

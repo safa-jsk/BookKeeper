@@ -32,7 +32,7 @@ function BookList() {
   if (loading) return <div className="text-center mt-5"><div className="spinner-border text-primary" /></div>;
 
   return (
-    <Box sx={{ p: 3 }}>
+    <Box sx={{ p: 3, maxWidth: '1200px', mx: 'auto' }}>
       <Typography variant="h4" component="h1" gutterBottom align="center">
         Browse Books
       </Typography>
@@ -58,25 +58,34 @@ function BookList() {
       </form>
 
       {/* Book Grid */}
-      <Grid container spacing={3}>
-        {books.length === 0 && !loading && <Typography variant="h6" align="center">No books found.</Typography>}
+      <Grid
+        container
+        spacing={3}
+        justifyContent="center" // <-- This centers the book grid!
+      >
+        {books.length === 0 && !loading && (
+          <Grid item xs={12}>
+            <Typography variant="h6" align="center">No books found.</Typography>
+          </Grid>
+        )}
         {books.map((book) => (
-          <Grid item xs={12} sm={6} md={4} key={book._id} sx={{ marginBottom: 4 }}>
-            <Card sx={{ maxWidth: 345, height: '100%' }}>
+          <Grid item xs={12} sm={6} md={4} lg={3} key={book._id} sx={{ display: 'flex', justifyContent: 'center' }}>
+            <Card sx={{ width: 260, height: 380, display: 'flex', flexDirection: 'column', alignItems: 'center', m: 'auto' }}>
               <CardMedia
                 component="img"
                 height="200"
                 image={book.image || '/default-book-cover.jpg'}
                 alt={book.title}
+                sx={{ objectFit: 'cover', width: '100%' }}
               />
-              <CardContent sx={{ flexGrow: 1 }}>
-                <Typography gutterBottom variant="h6" component="div">
+              <CardContent sx={{ flexGrow: 1, width: '100%' }}>
+                <Typography gutterBottom variant="h6" component="div" align="center">
                   {book.title}
                 </Typography>
-                <Typography variant="body2" color="text.secondary">
+                <Typography variant="body2" color="text.secondary" align="center">
                   <strong>Author:</strong> {book.author}
                 </Typography>
-                <Typography variant="body2" color="text.secondary">
+                <Typography variant="body2" color="text.secondary" align="center">
                   <strong>Genre:</strong> {book.genre}
                 </Typography>
               </CardContent>

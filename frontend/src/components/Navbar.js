@@ -20,16 +20,7 @@ function Navbar({ user, onLogout }) {
           {/* Push auth buttons to the right */}
           <div style={{ flexGrow: 1 }} />
 
-          {!user ? (
-            <>
-              <Button color="inherit" component={Link} to="/login" sx={{ mr: 2 }}>
-                Login
-              </Button>
-              <Button color="inherit" component={Link} to="/register">
-                Register
-              </Button>
-            </>
-          ) : (
+          {user && (
             <>
               <Typography variant="body1" sx={{ mr: 2 }}>
                 Welcome, {user.firstName}!
