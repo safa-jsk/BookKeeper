@@ -7,9 +7,13 @@ function Navbar({ user, onLogout }) {
     <AppBar position="sticky" color="primary">
       <Container maxWidth="lg">
         <Toolbar>
-          <Button color="inherit" component={Link} to="/" sx={{ mr: 2 }}>
-            BookKeeper
-          </Button>
+          <Link to="/" style={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }}>
+            <img
+              src="/images/logo_w.png"
+              alt="BookKeeper Logo"
+              style={{ height: 40, marginRight: 20, display: 'block' }}
+            />
+          </Link>
           <Button color="inherit" component={Link} to="/browse" sx={{ mr: 2 }}>
             Browse Books
           </Button>
