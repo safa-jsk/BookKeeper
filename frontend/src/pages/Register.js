@@ -1,49 +1,84 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import { TextField, Button, MenuItem, Box, Typography, Alert } from '@mui/material';
+
+const cities = [
+    'Dhaka', 'Chattogram', 'Rajshahi', 'Barishal', 'Sylhet',
+    'Khulna', 'Cumilla', 'Mymensingh', 'Rangpur', 'Gazipur'
+];
 
 function Register({ onRegister }) {
-    const [username, setUsername] = useState('');
-    const [password, setPassword] = useState('');
-    const [success, setSuccess] = useState('');
+    const [form, setForm] = useState({
+        firstName: '', lastName: '', email: '', password: '',
+        confirmPassword: '', gender: '', dob: '', city: ''
+    });
     const [error, setError] = useState('');
+    const [success, setSuccess] = useState('');
 
-    const handleRegister = async (e) => {
+    // Simple password validation function
+    function validatePassword(pw) {
+        return pw.length >= 8 && /[0-9]/.test(pw) && /[A-Z]/.test(pw);
+    }
+
+    const handleChange = (e) => {
+        setForm({ ...form, [e.target.name]: e.target.value });
+    };
+
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        setSuccess('');
         setError('');
+        setSuccess('');
+        // Basic client-side validation
+        if (!validatePassword(form.password)) {
+            setError('Password must be at least 8 characters, include an uppercase letter and a number.');
+            return;
+        }
+        if (form.password !== form.confirmPassword) {
+            setError('Passwords do not match.');
+            return;
+        }
+        if (!form.firstName || !form.lastName || !form.email || !form.gender || !form.dob || !form.city) {
+            setError('Please fill out all fields.');
+            return;
+        }
         try {
-            await axios.post('http://localhost:5000/api/auth/register', { username, password });
+            await axios.post('http://localhost:5000/api/auth/register', form);
             setSuccess('Registration successful! You can now log in.');
-            setUsername('');
-            setPassword('');
+            setForm({ firstName: '', lastName: '', email: '', password: '', confirmPassword: '', gender: '', dob: '', city: '' });
             if (onRegister) onRegister();
         } catch (err) {
-            setError(err.response?.data?.error || 'Registration failed');
+            setError(err.response?.data?.error || 'Registration failed.');
         }
     };
 
     return (
-        <form onSubmit={handleRegister} style={{ maxWidth: 400, margin: '40px auto', padding: 24, border: '1px solid #ddd', borderRadius: 8 }}>
-            <h2>Register</h2>
-            <input
-                value={username}
-                onChange={e => setUsername(e.target.value)}
-                placeholder="Username"
-                required
-                style={{ display: 'block', width: '100%', marginBottom: 12, padding: 8 }}
-            />
-            <input
-                type="password"
-                value={password}
-                onChange={e => setPassword(e.target.value)}
-                placeholder="Password"
-                required
-                style={{ display: 'block', width: '100%', marginBottom: 12, padding: 8 }}
-            />
-            <button type="submit" style={{ width: '100%', padding: 10 }}>Register</button>
-            {success && <div style={{ color: 'green', marginTop: 8 }}>{success}</div>}
-            {error && <div style={{ color: 'red', marginTop: 8 }}>{error}</div>}
-        </form>
+        <Box sx={{ maxWidth: 400, mx: 'auto', mt: 5, p: 3, border: '1px solid #ddd', borderRadius: 2 }}>
+            <Typography variant="h5" mb={2}>Register</Typography>
+            <form onSubmit={handleSubmit} autoComplete="off">
+                <TextField label="First Name" name="firstName" value={form.firstName} onChange={handleChange} fullWidth required sx={{ mb: 2 }} />
+                <TextField label="Last Name" name="lastName" value={form.lastName} onChange={handleChange} fullWidth required sx={{ mb: 2 }} />
+                <TextField label="Email" name="email" type="email" value={form.email} onChange={handleChange} fullWidth required sx={{ mb: 2 }} />
+                <TextField label="Password" name="password" type="password" value={form.password} onChange={handleChange} fullWidth required sx={{ mb: 2 }}
+                    helperText="Min 8 chars, include number & uppercase letter" />
+                <TextField label="Confirm Password" name="confirmPassword" type="password" value={form.confirmPassword} onChange={handleChange} fullWidth required sx={{ mb: 2 }} />
+                <TextField
+                    select label="Gender" name="gender" value={form.gender} onChange={handleChange}
+                    fullWidth required sx={{ mb: 2 }}>
+                    <MenuItem value="Male">Male</MenuItem>
+                    <MenuItem value="Female">Female</MenuItem>
+                </TextField>
+                <TextField label="Date of Birth" name="dob" type="date" value={form.dob} onChange={handleChange} fullWidth required sx={{ mb: 2 }}
+                    InputLabelProps={{ shrink: true }} />
+                <TextField
+                    select label="City" name="city" value={form.city} onChange={handleChange}
+                    fullWidth required sx={{ mb: 2 }}>
+                    {cities.map(city => <MenuItem key={city} value={city}>{city}</MenuItem>)}
+                </TextField>
+                <Button type="submit" variant="contained" color="primary" fullWidth>Register</Button>
+                {error && <Alert severity="error" sx={{ mt: 2 }}>{error}</Alert>}
+                {success && <Alert severity="success" sx={{ mt: 2 }}>{success}</Alert>}
+            </form>
+        </Box>
     );
 }
 

@@ -32,7 +32,7 @@ function Navbar({ user, onLogout }) {
           ) : (
             <>
               <Typography variant="body1" sx={{ mr: 2 }}>
-                Welcome, {user}!
+                Welcome, {user.firstName}!
               </Typography>
               <Button color="inherit" onClick={onLogout}>
                 Logout
