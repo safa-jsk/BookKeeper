@@ -1,4 +1,15 @@
 /* styles/styles.css */
+body {
+  background: #E3D4B9;
+  color: #4B3D2D;
+}
+a {
+  color: #8B5B29;
+}
+a:hover {
+  color: #A65E2E;
+}
+
 .container {
   max-width: 1200px;
   margin: 0 auto;
