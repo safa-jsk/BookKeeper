@@ -1,12 +1,12 @@
 # Node
 node_modules/
 npm-debug.log
-.env
+backend/.env
 
 # React
 frontend/build/
 frontend/node_modules/
-frontend/.env
+# frontend/.env
 
 # OS/system
 .DS_Store

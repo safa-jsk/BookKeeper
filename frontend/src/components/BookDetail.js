@@ -12,7 +12,7 @@ function BookDetail() {
   const [newReview, setNewReview] = useState({ user: '', rating: 5, comment: '' });
 
   useEffect(() => {
-    axios.get(`http://localhost:5000/api/books/${id}`)
+    axios.get(`${process.env.REACT_APP_API_URL}/api/books/${id}`)
       .then(res => {
         setBook(res.data);
         setLoading(false);
@@ -25,7 +25,7 @@ function BookDetail() {
 
   const handleReviewSubmit = (e) => {
     e.preventDefault();
-    axios.post(`http://localhost:5000/api/books/${id}/reviews`, newReview)
+    axios.post(`${process.env.REACT_APP_API_URL}/api/books/${id}/reviews`, newReview)
       .then(res => {
         setBook(res.data);
         setNewReview({ user: '', rating: 5, comment: '' });

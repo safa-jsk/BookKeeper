@@ -25,7 +25,7 @@ function BookList() {
     try {
       const params = { query };
       if (filter && filter !== 'none') params.filter = filter;
-      const response = await axios.get('http://localhost:5000/api/books/search', { params });
+      const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/books/search`, { params });
       setBooks(response.data);
     } catch {
       setBooks([]);

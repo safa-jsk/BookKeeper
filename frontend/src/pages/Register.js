@@ -40,7 +40,7 @@ function Register({ onRegister }) {
             return;
         }
         try {
-            await axios.post('http://localhost:5000/api/auth/register', form);
+            await axios.post(`${process.env.REACT_APP_API_URL}/api/auth/register`, form);
             setSuccess('Registration successful! You can now log in.');
             setForm({ firstName: '', lastName: '', email: '', password: '', confirmPassword: '', gender: '', dob: '', city: '' });
             if (onRegister) onRegister();
