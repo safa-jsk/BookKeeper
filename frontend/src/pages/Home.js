@@ -36,10 +36,10 @@ function Home({ setUser }) {
         >
           <Box display="flex" flexDirection="column" alignItems="center">
             <Paper elevation={6} sx={{ p: { xs: 3, md: 6 }, borderRadius: 3, width: '100%', maxWidth: 540, textAlign: 'center' }}>
-              <img src="/images/logo_brown.png" alt="BookKeeper Logo" style={{ height: 100, marginBottom: 16 }} />
               <Typography variant="h2" sx={{ color: '#4B3D2D', fontWeight: 700, mb: 2 }}>
-                Welcome to BookKeeper!
+                Welcome to
               </Typography>
+              <img src="/images/logo_brown.png" alt="BookKeeper Logo" style={{ height: 100, marginBottom: 16 }} />
               <Typography variant="h5" sx={{ color: '#8B5B29', mb: 4 }}>
                 Your AI-powered library companion.
               </Typography>
