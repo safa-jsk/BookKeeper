@@ -3,6 +3,12 @@ import { Link } from 'react-router-dom';
 import { AppBar, Toolbar, Button, Box, Container } from '@mui/material';
 
 function Navbar({ user, onLogout }) {
+  let effectiveUser = user;
+  if (!effectiveUser) {
+    const local = localStorage.getItem('user');
+    if (local) effectiveUser = JSON.parse(local);
+  }
+
   return (
     <AppBar
       position="sticky"
@@ -72,7 +78,7 @@ function Navbar({ user, onLogout }) {
           {user ? (
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
               <span style={{ color: '#E3D4B9', fontWeight: 500 }}>
-                Welcome, {user.firstName}
+                Welcome, {effectiveUser.firstName}
               </span>
               <Button
                 variant="outlined"

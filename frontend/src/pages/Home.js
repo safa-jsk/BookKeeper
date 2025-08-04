@@ -5,7 +5,7 @@ import { ToggleButton, ToggleButtonGroup } from '@mui/material';
 import Login from './Login';
 import Register from './Register';
 
-function Home({ setUser }) {
+function Home({ onLogin }) {
   const [selectedForm, setSelectedForm] = useState('login');
 
   return (
@@ -149,9 +149,9 @@ function Home({ setUser }) {
 
               {/* Show Login or Register form below the toggles */}
               {selectedForm === 'login' ? (
-                <Login onLogin={setUser} />
+                <Login onLogin={onLogin} />
               ) : (
-                <Register onRegister={setUser} />
+                <Register onRegister={onLogin} />
               )}
             </Paper>
           </Box>
