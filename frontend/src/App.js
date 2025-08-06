@@ -7,6 +7,13 @@ import BookDetail from './components/BookDetail';
 import Trending from './pages/Trending';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import DashboardLayout from './pages/DashboardLayout';
+import DashboardHome from './pages/DashboardHome';
+import WantToRead from './pages/WantToRead';
+import Finished from './pages/Finished';
+import CurrentlyReading from './pages/CurrentlyReading';
+import Favorites from './pages/Favorites';
+import AccountSettings from './pages/AccountSettings';
 import './styles/styles.css';
 
 function App() {
@@ -43,6 +50,15 @@ function App() {
         <Route path="/books/:id" element={<BookDetail />} />
         <Route path="/login" element={<Login onLogin={handleLogin} />} />
         <Route path="/register" element={<Register onRegister={handleLogin} />} />
+        <Route path="/dashboard/*" element={<DashboardLayout user={user} onLogout={handleLogout} />}>
+          <Route index element={<DashboardHome user={user} />} />
+          <Route path="want-to-read" element={<WantToRead user={user} />} />
+          <Route path="finished" element={<Finished user={user} />} />
+          <Route path="currently-reading" element={<CurrentlyReading user={user} />} />
+          <Route path="favorites" element={<Favorites user={user} />} />
+          <Route path="account-settings" element={<AccountSettings user={user} onLogout={handleLogout} />} />
+        </Route>
+        <Route path="*" element={<Home />} />
       </Routes>
     </Router>
   );

@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { AppBar, Toolbar, Button, Box, Container } from '@mui/material';
+import { AppBar, Toolbar, Button, Box, Container, Menu, MenuItem } from '@mui/material';
 
 function Navbar({ user, onLogout }) {
   let effectiveUser = user;
@@ -8,6 +8,9 @@ function Navbar({ user, onLogout }) {
     const local = localStorage.getItem('user');
     if (local) effectiveUser = JSON.parse(local);
   }
+
+  const [anchorEl, setAnchorEl] = useState(null);
+  const open = Boolean(anchorEl);
 
   return (
     <AppBar
@@ -74,26 +77,27 @@ function Navbar({ user, onLogout }) {
             </Button>
           </Box>
 
-          {/* User Info & Logout */}
-          {user ? (
+          {/* User Dropdown */}
+          {effectiveUser ? (
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-              <span style={{ color: '#E3D4B9', fontWeight: 500 }}>
-                Welcome, {effectiveUser.firstName}
-              </span>
               <Button
-                variant="outlined"
-                onClick={onLogout}
-                sx={{
-                  color: '#4B3D2D',
-                  borderColor: '#C2B280',
-                  backgroundColor: '#E3D4B9',
-                  '&:hover': {
-                    backgroundColor: '#C2B280'
-                  }
-                }}
+                color="inherit"
+                onClick={(e) => setAnchorEl(e.currentTarget)}
+                sx={{ fontWeight: 500 }}
               >
-                Logout
+                Welcome, {effectiveUser.firstName}
               </Button>
+              <Menu anchorEl={anchorEl} open={open} onClose={() => setAnchorEl(null)}>
+                <MenuItem component={Link} to="/dashboard" onClick={() => setAnchorEl(null)}>
+                  Dashboard
+                </MenuItem>
+                <MenuItem component={Link} to="/dashboard/account-settings" onClick={() => setAnchorEl(null)}>
+                  Account Settings
+                </MenuItem>
+                <MenuItem onClick={() => { setAnchorEl(null); onLogout(); }}>
+                  Logout
+                </MenuItem>
+              </Menu>
             </Box>
           ) : null}
         </Toolbar>
