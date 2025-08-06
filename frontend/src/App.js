@@ -22,8 +22,14 @@ function App() {
   // Restore user from localStorage
   useEffect(() => {
     const savedUser = localStorage.getItem('user');
-    if (savedUser) {
-      setUser(JSON.parse(savedUser));
+    if (savedUser && savedUser !== "undefined") {
+      try {
+        setUser(JSON.parse(savedUser));
+      } catch {
+        setUser(null); // In case of corrupted JSON, fallback to null
+      }
+    } else {
+      setUser(null);
     }
   }, []);
 

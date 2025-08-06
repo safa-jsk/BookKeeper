@@ -1,18 +1,21 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
 import { Box, Typography, Paper, LinearProgress, Grid, Chip } from '@mui/material';
 
-// Dummy data for demonstration
-const currentlyReading = [
-    { title: "1984", author: "George Orwell", progress: 65 },
-    { title: "The Hobbit", author: "J.R.R. Tolkien", progress: 30 }
-];
-const booksReadThisYear = 8;
-const wantToRead = [
-    { title: "Dune", available: true },
-    { title: "Sapiens", available: false }
-];
-
 export default function DashboardHome({ user }) {
+    const [data, setData] = useState(null);
+
+    useEffect(() => {
+        const token = localStorage.getItem('token');
+        axios.get(`${process.env.REACT_APP_API_URL}/api/dashboard`, {
+            headers: { Authorization: `Bearer ${token}` }
+        }).then(res => {
+            setData(res.data);
+        });
+    }, []);
+
+    if (!data) return <Typography>Loading dashboard...</Typography>;
+
     return (
         <Box>
             <Typography variant="h4" sx={{ mb: 3 }}>
@@ -22,15 +25,15 @@ export default function DashboardHome({ user }) {
             {/* Currently Reading Progress */}
             <Paper elevation={2} sx={{ mb: 4, p: 3 }}>
                 <Typography variant="h6" gutterBottom>📚 Currently Reading</Typography>
-                {currentlyReading.length === 0 ? (
+                {data.currentlyReading.length === 0 ? (
                     <Typography>No books currently being read.</Typography>
                 ) : (
-                    currentlyReading.map((book) => (
-                        <Box key={book.title} sx={{ mb: 2 }}>
+                    data.currentlyReading.map((book) => (
+                        <Box key={book._id} sx={{ mb: 2 }}>
                             <Typography fontWeight={600}>{book.title}</Typography>
                             <Typography variant="body2" sx={{ mb: 1 }}>by {book.author}</Typography>
-                            <LinearProgress variant="determinate" value={book.progress} sx={{ height: 10, borderRadius: 5 }} />
-                            <Typography variant="caption">{book.progress}% complete</Typography>
+                            <LinearProgress variant="determinate" value={book.progress || 0} sx={{ height: 10, borderRadius: 5 }} />
+                            <Typography variant="caption">{book.progress || 0}% complete</Typography>
                         </Box>
                     ))
                 )}
@@ -41,18 +44,18 @@ export default function DashboardHome({ user }) {
                 <Grid item xs={12} md={4}>
                     <Paper elevation={2} sx={{ p: 3, textAlign: 'center' }}>
                         <Typography variant="h6" gutterBottom>🎯 Books Read This Year</Typography>
-                        <Typography variant="h2" sx={{ color: '#4B3D2D' }}>{booksReadThisYear}</Typography>
+                        <Typography variant="h2" sx={{ color: '#4B3D2D' }}>{data.booksReadThisYear}</Typography>
                     </Paper>
                 </Grid>
                 {/* Want to Read Availability */}
                 <Grid item xs={12} md={8}>
                     <Paper elevation={2} sx={{ p: 3 }}>
                         <Typography variant="h6" gutterBottom>📝 Want To Read</Typography>
-                        {wantToRead.length === 0 ? (
+                        {data.wantToRead.length === 0 ? (
                             <Typography>No books in your Want To Read list.</Typography>
                         ) : (
-                            wantToRead.map((book) => (
-                                <Box key={book.title} sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                            data.wantToRead.map((book) => (
+                                <Box key={book._id} sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                                     <Typography sx={{ flex: 1 }}>{book.title}</Typography>
                                     <Chip
                                         label={book.available ? "Available" : "Not Available"}

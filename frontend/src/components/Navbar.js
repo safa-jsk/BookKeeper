@@ -5,8 +5,14 @@ import { AppBar, Toolbar, Button, Box, Container, Menu, MenuItem } from '@mui/ma
 function Navbar({ user, onLogout }) {
   let effectiveUser = user;
   if (!effectiveUser) {
-    const local = localStorage.getItem('user');
-    if (local) effectiveUser = JSON.parse(local);
+    try {
+      const userStr = localStorage.getItem('user');
+      if (userStr && userStr !== "undefined") {
+        effectiveUser = JSON.parse(userStr);
+      }
+    } catch {
+      effectiveUser = null;
+    }
   }
 
   const [anchorEl, setAnchorEl] = useState(null);

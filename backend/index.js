@@ -20,14 +20,22 @@ mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log('MongoDB connected'))
   .catch(err => console.error(err));
 
-// Import routes
+// Books
 const bookRoutes = require('./routes/bookRoutes');
 app.use('/api/books', bookRoutes);
+
+// Auth
+const authRoutes = require('./routes/authRoutes');
+app.use('/api/auth', authRoutes);
+
+// Dashboard
+const dashboardRoutes = require('./routes/dashboard');
+app.use('/api/dashboard', dashboardRoutes);
+
+// User
+const userRoutes = require('./routes/userRoutes');
+app.use('/api/user', userRoutes);
 
 // Start the server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server started on port ${PORT}`));
-
-// Login
-const authRoutes = require('./routes/authRoutes');
-app.use('/api/auth', authRoutes);
