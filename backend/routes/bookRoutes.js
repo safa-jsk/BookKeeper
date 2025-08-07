@@ -64,7 +64,6 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-
 // Add review for a book
 router.post('/:id/reviews', async (req, res) => {
   const { user, rating, comment } = req.body;
@@ -74,20 +73,25 @@ router.post('/:id/reviews', async (req, res) => {
 
     const review = new Review({
       user,
-      rating,
+      rating: Number(rating),
       comment
     });
     await review.save();
 
-    // Push the newly created review's ObjectId to the book's reviews array
-    book.reviews.push(review._id);  // Save review reference in book
-    book.rating = await calculateAverageRating(book._id);  // Recalculate average rating for the book
+    // Push just the ObjectId
+    book.reviews.push(review._id);
     await book.save();
 
-    // Return updated book with reviews
-    await book.populate('reviews');
-    res.json(book);  // Return updated book with all reviews
+    // IMPORTANT: re-fetch book to ensure reviews are up-to-date
+    const updatedBook = await Book.findById(book._id).populate('reviews');
+
+    // Recalculate average on the latest reviews
+    updatedBook.rating = await calculateAverageRating(updatedBook._id);
+    await updatedBook.save();
+
+    res.json(updatedBook);  // Return updated book with all reviews
   } catch (err) {
+    console.error('Review submit error:', err);
     res.status(500).json({ error: 'Server error' });
   }
 });
@@ -96,11 +100,18 @@ router.post('/:id/reviews', async (req, res) => {
 // Helper function to calculate the average rating for a book
 async function calculateAverageRating(bookId) {
   const book = await Book.findById(bookId).populate('reviews');
-  const reviews = book.reviews;  // All the populated reviews
+  if (!book || !book.reviews.length) return 0;
 
-  const totalRating = reviews.reduce((acc, review) => acc + review.rating, 0);
-  return totalRating / reviews.length;  // Return average rating
+  // Only count reviews that exist (filter out nulls)
+  const validReviews = book.reviews.filter(r => r && typeof r.rating === 'number');
+  if (!validReviews.length) return 0;
+  console.log('Valid reviews:', validReviews);
+
+  const avg = validReviews.reduce((acc, r) => acc + Number(r.rating), 0) / validReviews.length;
+  console.log('Calculated average rating:', avg);
+  return avg || 0;
 }
+
 
 // Get reviews for a book
 router.get('/:id/reviews', async (req, res) => {

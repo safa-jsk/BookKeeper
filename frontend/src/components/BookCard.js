@@ -3,7 +3,7 @@ import { Card, CardContent, CardMedia, Typography, Button, Stack } from '@mui/ma
 import { Link } from 'react-router-dom';
 import { useTheme } from '@mui/material/styles';
 
-function BookCard({ book, onRemove }) {
+export default function BookCard({ book, onRemove, onReview }) {
     const theme = useTheme();
     return (
         <Card
@@ -85,8 +85,18 @@ function BookCard({ book, onRemove }) {
                         Remove
                     </Button>
                 )}
+                {onReview && (
+                    <Button
+                        size="small"
+                        variant="outlined"
+                        color="secondary"
+                        onClick={() => onReview(book)}
+                        sx={{ borderRadius: 2, mt: 1, fontWeight: 600 }}
+                    >
+                        Review
+                    </Button>
+                )}
             </Stack>
         </Card>
     );
 }
-export default BookCard;
