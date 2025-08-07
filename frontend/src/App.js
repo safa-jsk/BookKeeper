@@ -9,10 +9,10 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import DashboardLayout from './pages/DashboardLayout';
 import DashboardHome from './pages/DashboardHome';
-import WantToRead from './pages/WantToRead';
-import Finished from './pages/Finished';
-import CurrentlyReading from './pages/CurrentlyReading';
-import Favorites from './pages/Favorites';
+import WantToRead from './pages/DashboardWantToRead';
+import Finished from './pages/DashboardFinished';
+import CurrentlyReading from './pages/DashboardCurrentlyReading';
+import Favorites from './pages/DashboardFavorites';
 import AccountSettings from './pages/AccountSettings';
 import './styles/styles.css';
 

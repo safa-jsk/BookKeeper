@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTheme } from '@mui/material/styles';
 import { Box, Typography, Button, Grid, Paper } from '@mui/material';
 import { Link } from 'react-router-dom';
 import { ToggleButton, ToggleButtonGroup } from '@mui/material';
@@ -6,10 +7,11 @@ import Login from './Login';
 import Register from './Register';
 
 function Home({ onLogin }) {
+  const theme = useTheme();
   const [selectedForm, setSelectedForm] = useState('login');
 
   return (
-    <Box sx={{ minHeight: 'calc(100vh - 64px)', bgcolor: '#E3D4B9', py: { xs: 2, md: 8 }, px: 2 }}>
+    <Box sx={{ minHeight: 'calc(100vh - 64px)', bgcolor: theme.palette.background.default, py: { xs: 2, md: 8 }, px: 2 }}>
       <Grid
         container
         spacing={2}
@@ -36,11 +38,11 @@ function Home({ onLogin }) {
         >
           <Box display="flex" flexDirection="column" alignItems="center">
             <Paper elevation={6} sx={{ p: { xs: 3, md: 6 }, borderRadius: 3, width: '100%', maxWidth: 540, textAlign: 'center' }}>
-              <Typography variant="h2" sx={{ color: '#4B3D2D', fontWeight: 700, mb: 2 }}>
+              <Typography variant="h2" sx={{ color: theme.palette.primary.main, fontWeight: 700, mb: 2 }}>
                 Welcome to
               </Typography>
               <img src="/images/logo_brown.png" alt="BookKeeper Logo" style={{ height: 100, marginBottom: 16 }} />
-              <Typography variant="h5" sx={{ color: '#8B5B29', mb: 4 }}>
+              <Typography variant="h5" sx={{ color: theme.palette.secondary.main, mb: 4 }}>
                 Your AI-powered library companion.
               </Typography>
               <Box>
@@ -50,8 +52,8 @@ function Home({ onLogin }) {
                   size="large"
                   variant="contained"
                   sx={{
-                    bgcolor: '#4B3D2D', color: '#fff', px: 4, py: 1.5, fontSize: 20, borderRadius: 2,
-                    '&:hover': { bgcolor: '#8B5B29' }
+                    bgcolor: theme.palette.primary.main, color: theme.palette.primary.contrastText, px: 4, py: 1.5, fontSize: 20, borderRadius: 2,
+                    '&:hover': { bgcolor: theme.palette.secondary.main, borderColor: theme.palette.primary.main }
                   }}
                 >
                   Browse Books
@@ -62,10 +64,10 @@ function Home({ onLogin }) {
                   size="large"
                   variant="outlined"
                   sx={{
-                    ml: 2, color: '#4B3D2D', borderColor: '#8B5B29',
+                    ml: 2, color: theme.palette.primary.main, borderColor: theme.palette.secondary.main,
                     px: 4, py: 1.5, fontSize: 20, borderRadius: 2,
-                    bgcolor: '#E3D4B9',
-                    '&:hover': { bgcolor: '#D9CBA0', borderColor: '#4B3D2D' }
+                    bgcolor: theme.palette.background.default,
+                    '&:hover': { bgcolor: theme.palette.background.paper, borderColor: theme.palette.primary.main }
                   }}
                 >
                   Trending
@@ -115,14 +117,14 @@ function Home({ onLogin }) {
                   value="login"
                   sx={{
                     width: 120,
-                    color: '#4B3D2D',
-                    backgroundColor: '#E3D4B9',
+                    color: theme.palette.primary.main,
+                    backgroundColor: theme.palette.background.default,
                     '&.Mui-selected': {
-                      backgroundColor: '#4B3D2D',
-                      color: '#fff',
+                      backgroundColor: theme.palette.primary.main,
+                      color: theme.palette.primary.contrastText,
                     },
                     '&:hover': {
-                      backgroundColor: '#C2B280',
+                      backgroundColor: theme.palette.info.main,
                     }
                   }}
                 >
@@ -132,14 +134,14 @@ function Home({ onLogin }) {
                   value="register"
                   sx={{
                     width: 120,
-                    color: '#4B3D2D',
-                    backgroundColor: '#E3D4B9',
+                    color: theme.palette.primary.main,
+                    backgroundColor: theme.palette.background.default,
                     '&.Mui-selected': {
-                      backgroundColor: '#4B3D2D',
-                      color: '#fff',
+                      backgroundColor: theme.palette.primary.main,
+                      color: theme.palette.primary.contrastText,
                     },
                     '&:hover': {
-                      backgroundColor: '#C2B280',
+                      backgroundColor: theme.palette.info.main,
                     }
                   }}
                 >

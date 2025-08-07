@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTheme } from '@mui/material/styles';
 import { Drawer, List, ListItem, ListItemButton, ListItemText, Box } from '@mui/material';
 import { Link, Outlet, useLocation } from 'react-router-dom';
 
@@ -12,6 +13,7 @@ const menu = [
 ];
 
 export default function DashboardLayout({ user, onLogout }) {
+    const theme = useTheme();
     const location = useLocation();
 
     return (
@@ -24,7 +26,7 @@ export default function DashboardLayout({ user, onLogout }) {
                     '& .MuiDrawer-paper': {
                         width: 220,
                         boxSizing: 'border-box',
-                        bgcolor: '#efe2b4',
+                        bgcolor: theme.palette.background.light,
                         top: '64px',                  // AppBar height here
                         height: 'calc(100vh - 64px)', // Matches AppBar height
                         position: 'fixed',
@@ -52,7 +54,7 @@ export default function DashboardLayout({ user, onLogout }) {
                 sx={{
                     flexGrow: 1,
                     p: { xs: 1, md: 4 },
-                    bgcolor: '#f8e8ca',
+                    bgcolor: theme.palette.background.light,
                     minHeight: '100vh',
                 }}
             >

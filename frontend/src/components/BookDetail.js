@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useTheme } from '@mui/material/styles';
 import { useParams, Link } from 'react-router-dom';
 import axios from 'axios';
 import {
@@ -13,6 +14,7 @@ const CATEGORIES = [
 ];
 
 function BookDetail() {
+  const theme = useTheme();
   const { id } = useParams();
   const [book, setBook] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -107,7 +109,7 @@ function BookDetail() {
           <Typography
             variant="h3"
             sx={{
-              color: '#4B3D2D',
+              color: theme.palette.primary.main,
               mb: 1,
               wordBreak: 'break-word',
               maxWidth: { xs: '100%', sm: 500, md: 600 },
@@ -116,41 +118,12 @@ function BookDetail() {
           >
             {book.title}
           </Typography>
-          <Typography variant="subtitle1" sx={{ color: '#8B5B29' }}>by {book.author}</Typography>
+          <Typography variant="subtitle1" sx={{ color: theme.palette.secondary.main }}>by {book.author}</Typography>
           <Typography variant="body1" sx={{ mt: 2 }}>
             <strong>Genre:</strong> {book.genre}
           </Typography>
           <Typography variant="body1"><strong>Year:</strong> {book.year}</Typography>
           <Typography variant="body1"><strong>Rating:</strong> {book.rating ? book.rating.toFixed(1) : 'N/A'} / 5.0</Typography>
-
-          <Stack direction="row" spacing={2} sx={{ my: 2 }}>
-            {CATEGORIES.map(cat => {
-              const inCat = isBookInCategory(cat.key);
-              return (
-                <Button
-                  key={cat.key}
-                  variant={inCat ? "outlined" : "contained"}
-                  color="primary"
-                  onClick={() => handleCategoryToggle(cat.key, inCat ? "remove" : "add")}
-                  sx={{ textTransform: 'none', fontWeight: 600 }}
-                >
-                  {inCat ? `Remove from ${cat.label}` : `Add to ${cat.label}`}
-                </Button>
-              );
-            })}
-          </Stack>
-
-          {/* Snackbar */}
-          <Snackbar
-            open={snackbar.open}
-            autoHideDuration={3000}
-            onClose={() => setSnackbar({ ...snackbar, open: false })}
-            anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
-          >
-            <Alert severity={snackbar.severity} onClose={() => setSnackbar({ ...snackbar, open: false })}>
-              {snackbar.message}
-            </Alert>
-          </Snackbar>
 
           <Divider sx={{ my: 3 }} />
 
@@ -164,7 +137,7 @@ function BookDetail() {
           <Typography variant="h5" sx={{ mb: 1 }}>Reviews</Typography>
           {book.reviews && book.reviews.length > 0 ? (
             book.reviews.map((review, idx) => (
-              <Paper key={idx} sx={{ mb: 2, p: 2, background: '#F8F6F1', maxWidth: 600 }}>
+              <Paper key={idx} sx={{ mb: 2, p: 2, background: theme.offWhite, maxWidth: 600 }}>
                 <Typography variant="subtitle2">
                   <strong>{review.user}</strong> rated {review.rating}/5
                 </Typography>
@@ -232,23 +205,26 @@ function BookDetail() {
         <Grid item xs={12} md={5} lg={4}
           sx={{
             display: 'flex',
-            justifyContent: { xs: 'center', md: 'flex-end' },
-            alignItems: { xs: 'flex-start', md: 'flex-start' }
+            flexDirection: 'column',        // Make children stack vertically!
+            justifyContent: { xs: 'center', md: 'flex-start' },
+            alignItems: { xs: 'center', md: 'flex-end' }
           }}>
           <Box
             sx={{
               width: 360,
-              height: 480,
-              bgcolor: '#fff',
+              bgcolor: theme.palette.background.paper,
               borderRadius: 2,
               overflow: 'hidden',
-              border: '2px solid #C2B280',
+              border: '2px solid theme.palette.info.main',
               boxShadow: 2,
               mb: 2,
               position: { md: 'sticky' },
               top: { md: 100 },
               zIndex: 1,
-              mt: { xs: 2, md: 0 }
+              mt: { xs: 2, md: 0 },
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center'
             }}
           >
             <CardMedia
@@ -262,7 +238,36 @@ function BookDetail() {
                 display: 'block'
               }}
             />
+            {/* Buttons go below the image */}
+            <Stack direction="column" spacing={2} sx={{ my: 2, width: '90%' }}>
+              {CATEGORIES.map(cat => {
+                const inCat = isBookInCategory(cat.key);
+                return (
+                  <Button
+                    key={cat.key}
+                    variant={inCat ? "outlined" : "contained"}
+                    color="primary"
+                    onClick={() => handleCategoryToggle(cat.key, inCat ? "remove" : "add")}
+                    sx={{ textTransform: 'none', fontWeight: 600 }}
+                  >
+                    {inCat ? `Remove from ${cat.label}` : `Add to ${cat.label}`}
+                  </Button>
+                );
+              })}
+            </Stack>
           </Box>
+
+          {/* Snackbar - keep it outside the Box for global positioning */}
+          <Snackbar
+            open={snackbar.open}
+            autoHideDuration={3000}
+            onClose={() => setSnackbar({ ...snackbar, open: false })}
+            anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+          >
+            <Alert severity={snackbar.severity} onClose={() => setSnackbar({ ...snackbar, open: false })}>
+              {snackbar.message}
+            </Alert>
+          </Snackbar>
         </Grid>
       </Grid>
     </Box>

@@ -1,10 +1,12 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { useTheme } from '@mui/material/styles';
 import { Box, Typography, Slider, IconButton, Paper } from '@mui/material';
 import VolumeUp from '@mui/icons-material/VolumeUp';
 import VolumeOff from '@mui/icons-material/VolumeOff';
 import { motion } from "framer-motion";
 
 function Trending() {
+    const theme = useTheme();
     const audioRef = useRef(null);
     const [volume, setVolume] = useState(100);
     const [muted, setMuted] = useState(false);
@@ -23,7 +25,7 @@ function Trending() {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            background: 'linear-gradient(120deg, #e3d4b9 0%, #d9cba0 100%)',
+            background: `linear-gradient(120deg, ${theme.palette.background.default} 0%, ${theme.palette.background.paper} 100%)`,
             pb: 6
         }}>
             <Paper
@@ -45,7 +47,7 @@ function Trending() {
             >
                 <Typography
                     variant="h4"
-                    sx={{ color: "#4B3D2D", mb: 2, fontWeight: 700, letterSpacing: 1 }}
+                    sx={{ color: theme.palette.primary.main, mb: 2, fontWeight: 700, letterSpacing: 1 }}
                     component={motion.div}
                     initial={{ scale: 0.85 }}
                     animate={{ scale: 1 }}
@@ -57,7 +59,7 @@ function Trending() {
                     src="/images/hakla_srk.jpg"
                     alt="Trollface"
                     width={180}
-                    style={{ borderRadius: 16, boxShadow: '0 4px 24px 0 #4B3D2D22' }}
+                    style={{ borderRadius: 16, boxShadow: `0 4px 24px 0 ${theme.palette.primary.main}` }}
                     initial={{ scale: 0.9, rotate: -10 }}
                     animate={{ scale: 1.06, rotate: 0 }}
                     transition={{ yoyo: Infinity, duration: 1.4, ease: "easeInOut" }}

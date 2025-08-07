@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTheme } from '@mui/material/styles';
 import { Link } from 'react-router-dom';
 import { AppBar, Toolbar, Button, Box, Container, Menu, MenuItem } from '@mui/material';
 
@@ -15,6 +16,7 @@ function Navbar({ user, onLogout }) {
     }
   }
 
+  const theme = useTheme();
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
 
@@ -22,7 +24,7 @@ function Navbar({ user, onLogout }) {
     <AppBar
       position="sticky"
       sx={{
-        backgroundColor: '#4B3D2D',
+        backgroundColor: theme.palette.primary.main,
         boxShadow: '0 2px 8px rgba(75,61,45,0.06)'
       }}
     >
@@ -61,8 +63,8 @@ function Navbar({ user, onLogout }) {
                 fontSize: 18,
                 fontWeight: 600,
                 textTransform: 'none',
-                color: '#E3D4B9',
-                '&:hover': { color: '#C2B280' }
+                color: theme.palette.background.default,
+                '&:hover': { color: theme.palette.info.main }
               }}
             >
               Browse Books
@@ -75,8 +77,8 @@ function Navbar({ user, onLogout }) {
                 fontSize: 18,
                 fontWeight: 600,
                 textTransform: 'none',
-                color: '#E3D4B9',
-                '&:hover': { color: '#C2B280' }
+                color: theme.palette.background.default,
+                '&:hover': { color: theme.palette.info.main }
               }}
             >
               Trending

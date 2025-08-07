@@ -29,7 +29,7 @@ const authRoutes = require('./routes/authRoutes');
 app.use('/api/auth', authRoutes);
 
 // Dashboard
-const dashboardRoutes = require('./routes/dashboard');
+const dashboardRoutes = require('./routes/dashboardRoutes');
 app.use('/api/dashboard', dashboardRoutes);
 
 // User
