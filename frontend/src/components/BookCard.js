@@ -3,7 +3,7 @@ import { Card, CardContent, CardMedia, Typography, Button, Stack } from '@mui/ma
 import { Link } from 'react-router-dom';
 import { useTheme } from '@mui/material/styles';
 
-export default function BookCard({ book, onRemove, onReview }) {
+export default function BookCard({ book, onRemove, onReview, onAddToFinished }) {
     const theme = useTheme();
     return (
         <Card
@@ -36,14 +36,19 @@ export default function BookCard({ book, onRemove, onReview }) {
                 }}
             />
             <CardContent sx={{ flexGrow: 1, p: 2 }}>
-                <Typography gutterBottom variant="h6" align="center" sx={{
-                    color: theme.palette.primary.main,
-                    fontWeight: 700,
-                    fontSize: 17,
-                    lineHeight: 1.15,
-                    height: 44,
-                    overflow: 'hidden'
-                }}>
+                <Typography
+                    gutterBottom
+                    variant="h6"
+                    align="center"
+                    sx={{
+                        color: theme.palette.primary.main,
+                        fontWeight: 700,
+                        fontSize: 17,
+                        lineHeight: 1.15,
+                        height: 44,
+                        overflow: 'hidden'
+                    }}
+                >
                     {book.title}
                 </Typography>
                 <Typography variant="body2" color={theme.palette.primary.main} align="center">
@@ -56,6 +61,7 @@ export default function BookCard({ book, onRemove, onReview }) {
                     <strong>Rating:</strong> {book.rating ? book.rating.toFixed(1) : 'N/A'}
                 </Typography>
             </CardContent>
+
             <Stack direction="column" spacing={1} sx={{ p: 2, pt: 0 }}>
                 <Button
                     size="small"
@@ -74,6 +80,7 @@ export default function BookCard({ book, onRemove, onReview }) {
                 >
                     View Details
                 </Button>
+
                 {onRemove && (
                     <Button
                         size="small"
@@ -85,16 +92,30 @@ export default function BookCard({ book, onRemove, onReview }) {
                         Remove
                     </Button>
                 )}
-                {onReview && (
+
+                {/* If onAddToFinished is provided, show that button; otherwise fall back to Review if available */}
+                {onAddToFinished ? (
                     <Button
                         size="small"
                         variant="outlined"
-                        color="secondary"
-                        onClick={() => onReview(book)}
+                        color="success"
+                        onClick={() => onAddToFinished(book._id)}
                         sx={{ borderRadius: 2, mt: 1, fontWeight: 600 }}
                     >
-                        Review
+                        Add to Finished
                     </Button>
+                ) : (
+                    onReview && (
+                        <Button
+                            size="small"
+                            variant="outlined"
+                            color="secondary"
+                            onClick={() => onReview(book)}
+                            sx={{ borderRadius: 2, mt: 1, fontWeight: 600 }}
+                        >
+                            Review
+                        </Button>
+                    )
                 )}
             </Stack>
         </Card>
