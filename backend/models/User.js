@@ -13,7 +13,8 @@ const userSchema = new Schema({
     wantToRead: [{ type: Schema.Types.ObjectId, ref: 'Book' }],
     finished: [{ type: Schema.Types.ObjectId, ref: 'Book' }],
     favorites: [{ type: Schema.Types.ObjectId, ref: 'Book' }],
-    currentlyReading: [{ type: Schema.Types.ObjectId, ref: 'Book' }]
+    currentlyReading: [{ type: Schema.Types.ObjectId, ref: 'Book' }],
+    avatar: { type: String, default: null }
 });
 
 // Hash the password before saving

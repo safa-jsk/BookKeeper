@@ -88,6 +88,9 @@ const theme = createTheme({
         }
     },
     offWhite: '#F8F6F1',
+    shape: {
+        borderRadius: 12
+    },
     components: {
         MuiAppBar: {
             styleOverrides: {
@@ -100,6 +103,8 @@ const theme = createTheme({
             styleOverrides: {
                 root: {
                     borderRadius: 8,
+                    textTransform: 'none',
+                    fontWeight: 700,
                 },
             },
         },
@@ -108,6 +113,10 @@ const theme = createTheme({
                 root: {
                     background: palette.accent,
                     color: palette.primary,
+                    transition: 'transform .2s',
+                    '&:hover': {
+                        transform: 'translateY(-2px)',
+                    },
                 },
             },
         },
