@@ -7,7 +7,6 @@ require('dotenv').config();
 const app = express();
 app.use(cors({
   origin: process.env.FRONTEND_URL,  // Frontend URL (React development server)
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
   credentials: true,
 }));
 app.use(express.json());
