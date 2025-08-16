@@ -1,7 +1,5 @@
 {
-  "rewrites": [
-    { "source": "/(.*)", "destination": "/index.html" }
-  ],
+  "version": 2,
   "builds": [
     {
       "src": "frontend/package.json",
@@ -9,12 +7,19 @@
       "config": {
         "distDir": "frontend/build"
       }
+    },
+    {
+      "src": "backend/api/**/*",
+      "use": "@vercel/node"
     }
   ],
-  "routes": [
-    {
-      "src": "/(.*)",
-      "dest": "/index.html"
-    }
-  ]
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "/api/$1" }
+  ],
+  "env": {
+    "MONGO_URI": "mongodb+srv://jabirsafakhandoker:j4a3b2i1r0@bookkeepercluster.xpx6uiz.mongodb.net/bookkeeper?retryWrites=true&w=majority",
+    "JWT_SECRET": "supersecretkey",
+    "FRONTEND_URL": "http://localhost:3000",
+    "REACT_APP_API_URL": "http://localhost:5000"
+  }
 }

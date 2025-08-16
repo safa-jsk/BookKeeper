@@ -6,7 +6,7 @@ backend/.env
 # React
 frontend/build/
 frontend/node_modules/
-# frontend/.env
+frontend/.env
 
 # OS/system
 .DS_Store
@@ -14,3 +14,4 @@ Thumbs.db
 
 # Others
 coverage/
+.vercel

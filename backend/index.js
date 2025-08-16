@@ -6,9 +6,8 @@ require('dotenv').config();
 
 const app = express();
 app.use(cors({
-  // origin: 'https://book-keeper-nine.vercel.app',
-  // methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  // credentials: true
+  origin: process.env.FRONTEND_URL,  // Frontend URL (React development server)
+  credentials: true,
 }));
 app.use(express.json());
 
@@ -21,19 +20,19 @@ mongoose.connect(process.env.MONGO_URI)
   .catch(err => console.error(err));
 
 // Books
-const bookRoutes = require('./routes/bookRoutes');
+const bookRoutes = require('./api/bookRoutes');
 app.use('/api/books', bookRoutes);
 
 // Auth
-const authRoutes = require('./routes/authRoutes');
+const authRoutes = require('./api/authRoutes');
 app.use('/api/auth', authRoutes);
 
 // Dashboard
-const dashboardRoutes = require('./routes/dashboardRoutes');
+const dashboardRoutes = require('./api/dashboardRoutes');
 app.use('/api/dashboard', dashboardRoutes);
 
 // User
-const userRoutes = require('./routes/userRoutes');
+const userRoutes = require('./api/userRoutes');
 app.use('/api/user', userRoutes);
 
 // Start the server
