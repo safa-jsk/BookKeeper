@@ -11,9 +11,18 @@
     {
       "src": "backend/routes/**/*",
       "use": "@vercel/node"
+    },
+    {
+      "src": "server.js",
+      "use": "@vercel/node"
     }
   ],
-  
+  "routes": [
+    {
+      "src": "/api/books/(.*)",
+      "dest": "/server.js"
+    }
+  ],
   "env": {
     "MONGO_URI": "mongodb+srv://jabirsafakhandoker:j4a3b2i1r0@bookkeepercluster.xpx6uiz.mongodb.net/bookkeeper?retryWrites=true&w=majority",
     "JWT_SECRET": "supersecretkey",
