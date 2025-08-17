@@ -22,7 +22,7 @@
   "rewrites": [
     {
       "source": "/api/(.*)",
-      "destination": "https://book-keeper-e99r.vercel.app/api/$1"
+      "destination": "https://book-keeper-server.vercel.app/api/$1"
     }
   ]
 }
