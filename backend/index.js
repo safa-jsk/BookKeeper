@@ -36,6 +36,11 @@ app.use('/api/dashboard', dashboardRoutes);
 const userRoutes = require('./routes/userRoutes');
 app.use('/api/user', userRoutes);
 
-// Start the server
+// Start the server (for local development)
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server started on port ${PORT}`));
+if (process.env.NODE_ENV !== 'production') {
+  app.listen(PORT, () => console.log(`Server started on port ${PORT}`));
+}
+
+// Export for Vercel
+module.exports = app;

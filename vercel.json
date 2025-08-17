@@ -9,18 +9,18 @@
       }
     },
     {
-      "src": "backend/routes/**/*",
-      "use": "@vercel/node"
-    },
-    {
-      "src": "index.js",
+      "src": "backend/index.js",
       "use": "@vercel/node"
     }
   ],
   "routes": [
     {
-      "src": "/api/books/(.*)",
-      "dest": "/index.js"
+      "src": "/api/(.*)",
+      "dest": "/backend/index.js"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/frontend/build/$1"
     }
   ],
   "env": {
