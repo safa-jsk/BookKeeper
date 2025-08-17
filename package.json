@@ -1,6 +1,7 @@
 {
   "dependencies": {
     "@vercel/node": "^5.3.13",
+    "@vercel/static-build": "^2.7.18",
     "react-helmet": "^6.1.0"
   }
 }
