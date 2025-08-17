@@ -13,16 +13,6 @@
       "use": "@vercel/node"
     }
   ],
-  "routes": [
-    {
-      "src": "/api/(.*)",
-      "dest": "/backend/index.js"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/frontend/build/$1"
-    }
-  ],
   "env": {
     "MONGO_URI": "mongodb+srv://jabirsafakhandoker:j4a3b2i1r0@bookkeepercluster.xpx6uiz.mongodb.net/bookkeeper?retryWrites=true&w=majority",
     "JWT_SECRET": "supersecretkey",
