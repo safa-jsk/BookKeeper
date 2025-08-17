@@ -28,5 +28,11 @@
     "JWT_SECRET": "supersecretkey",
     "FRONTEND_URL": "https://book-keeper-470.vercel.app",
     "REACT_APP_API_URL": "https://book-keeper-e99r.vercel.app"
-  }
+  },
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "https://book-keeper-e99r.vercel.app/api/:path*"
+    }
+  ]
 }
