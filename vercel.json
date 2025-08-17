@@ -9,7 +9,7 @@
       }
     },
     {
-      "src": "backend/api/**/*",
+      "src": "backend/routes/**/*",
       "use": "@vercel/node"
     }
   ],
