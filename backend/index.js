@@ -7,6 +7,7 @@ require('dotenv').config();
 const app = express();
 app.use(cors({
   origin: process.env.FRONTEND_URL,  // Frontend URL (React development server)
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
   credentials: true,
 }));
 app.use(express.json());
@@ -20,19 +21,19 @@ mongoose.connect(process.env.MONGO_URI)
   .catch(err => console.error(err));
 
 // Books
-const bookRoutes = require('./api/bookRoutes');
+const bookRoutes = require('./routes/bookRoutes');
 app.use('/api/books', bookRoutes);
 
 // Auth
-const authRoutes = require('./api/authRoutes');
+const authRoutes = require('./routes/authRoutes');
 app.use('/api/auth', authRoutes);
 
 // Dashboard
-const dashboardRoutes = require('./api/dashboardRoutes');
+const dashboardRoutes = require('./routes/dashboardRoutes');
 app.use('/api/dashboard', dashboardRoutes);
 
 // User
-const userRoutes = require('./api/userRoutes');
+const userRoutes = require('./routes/userRoutes');
 app.use('/api/user', userRoutes);
 
 // Start the server
