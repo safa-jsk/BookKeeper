@@ -4,6 +4,7 @@ const User = require('../models/User');
 const router = express.Router();
 
 const JWT_SECRET = process.env.JWT_SECRET || 'supersecretkey';
+const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '2h';
 
 // Register route
 router.post('/register', async (req, res) => {
@@ -40,8 +41,13 @@ router.post('/login', async (req, res) => {
             city: user.city,
             gender: user.gender
         };
-        const token = jwt.sign({ id: user._id, ...userInfo }, JWT_SECRET, { expiresIn: '2h' });
-        res.json({ token, user: userInfo });
+        const roleInfo = {
+            role: user.role, // 'reader' | 'librarian' | 'admin'
+            librarianApplicationStatus: user.librarianApplicationStatus || 'none'
+        };
+
+        const token = jwt.sign({ id: user._id, ...userInfo, ...roleInfo }, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
+        res.json({ token, user: { ...userInfo, ...roleInfo } });
     } catch (err) {
         res.status(500).json({ error: 'Login failed' });
     }

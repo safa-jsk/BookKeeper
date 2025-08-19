@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const auth = require('../middleware/auth');
+const { requireAuth } = require('../middleware/auth');
 const User = require('../models/User');
 const Book = require('../models/Book');
 const bcrypt = require('bcryptjs');
@@ -17,7 +17,7 @@ const BOOK_CATEGORY_MAP = {
 
 
 // Add book to a category
-router.post('/books/:bookId/add-to-category', auth, async (req, res) => {
+router.post('/books/:bookId/add-to-category', requireAuth, async (req, res) => {
     const { category } = req.body;
     const { bookId } = req.params;
     const userId = req.user.id;
@@ -42,7 +42,7 @@ router.post('/books/:bookId/add-to-category', auth, async (req, res) => {
 });
 
 // Remove book from a category
-router.post('/books/:bookId/remove-from-category', auth, async (req, res) => {
+router.post('/books/:bookId/remove-from-category', requireAuth, async (req, res) => {
     const { category } = req.body;
     const { bookId } = req.params;
     const userId = req.user.id;
@@ -78,7 +78,7 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 // ---------- Get my profile ----------
-router.get('/me', auth, async (req, res) => {
+router.get('/me', requireAuth, async (req, res) => {
     const user = await User.findById(req.user.id).lean();
     if (!user) return res.status(404).json({ message: 'User not found' });
     // don’t send hashed password
@@ -87,7 +87,7 @@ router.get('/me', auth, async (req, res) => {
 });
 
 // ---------- Update profile (name, gender, dob, city) ----------
-router.put('/me', auth, async (req, res) => {
+router.put('/me', requireAuth, async (req, res) => {
     const { firstName, lastName, gender, dob, city } = req.body;
     const user = await User.findById(req.user.id);
     if (!user) return res.status(404).json({ message: 'User not found' });
@@ -104,7 +104,7 @@ router.put('/me', auth, async (req, res) => {
 });
 
 // ---------- Change password ----------
-router.patch('/me/password', auth, async (req, res) => {
+router.patch('/me/password', requireAuth, async (req, res) => {
     const { currentPassword, newPassword } = req.body;
     if (!currentPassword || !newPassword) {
         return res.status(400).json({ message: 'Current and new passwords are required' });
@@ -121,7 +121,7 @@ router.patch('/me/password', auth, async (req, res) => {
 });
 
 // ---------- Upload avatar ----------
-router.post('/me/avatar', auth, upload.single('avatar'), async (req, res) => {
+router.post('/me/avatar', requireAuth, upload.single('avatar'), async (req, res) => {
     if (!req.file) return res.status(400).json({ message: 'No file uploaded' });
     // store relative path for the static server: "images/avatars/filename.ext"
     const relPath = path.join('images', 'avatars', path.basename(req.file.path));
@@ -135,7 +135,7 @@ router.post('/me/avatar', auth, upload.single('avatar'), async (req, res) => {
 });
 
 // ---------- Delete my account (danger zone) ----------
-router.delete('/me', auth, async (req, res) => {
+router.delete('/me', requireAuth, async (req, res) => {
     await User.findByIdAndDelete(req.user.id);
     // (Optional) also remove user from Book.reverse arrays if you rely on them
     res.json({ ok: true });

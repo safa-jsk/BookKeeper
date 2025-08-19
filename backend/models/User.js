@@ -14,8 +14,18 @@ const userSchema = new Schema({
     finished: [{ type: Schema.Types.ObjectId, ref: 'Book' }],
     favorites: [{ type: Schema.Types.ObjectId, ref: 'Book' }],
     currentlyReading: [{ type: Schema.Types.ObjectId, ref: 'Book' }],
-    avatar: { type: String, default: null }
-});
+    avatar: { type: String, default: null },
+    role: {
+        type: String,
+        enum: ['reader', 'librarian', 'admin'],
+        default: 'reader'
+    },
+    librarianApplicationStatus: {
+        type: String,
+        enum: ['none', 'pending', 'approved', 'rejected'],
+        default: 'none'
+    }
+}, { timestamps: true });
 
 // Hash the password before saving
 userSchema.pre('save', async function (next) {

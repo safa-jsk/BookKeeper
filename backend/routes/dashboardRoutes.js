@@ -1,12 +1,12 @@
 const express = require('express');
 const router = express.Router();
-const auth = require('../middleware/auth'); // <-- your middleware
+const { requireAuth, requireRole, rolesAtLeast, requireAdmin } = require('../middleware/auth');
 const User = require('../models/User');
 const Book = require('../models/Book'); // For ObjectId validation
 const Review = require('../models/Review'); // For ObjectId validation
 const mongoose = require('mongoose'); // For ObjectId validation
 
-router.get('/', auth, async (req, res) => {
+router.get('/', requireAuth, async (req, res) => {
     try {
         const userId = req.user.id; // <-- available here!
         // Dashboard logic...
@@ -30,31 +30,31 @@ router.get('/', auth, async (req, res) => {
 
 // Want to Read
 // In dashboard.js route file
-router.get('/want-to-read', auth, async (req, res) => {
+router.get('/want-to-read', requireAuth, async (req, res) => {
     const user = await User.findById(req.user.id).populate('wantToRead');
     res.json({ wantToRead: user.wantToRead });
 });
 
 // Currently Reading
-router.get('/currently-reading', auth, async (req, res) => {
+router.get('/currently-reading', requireAuth, async (req, res) => {
     const user = await User.findById(req.user.id).populate('currentlyReading');
     res.json({ currentlyReading: user.currentlyReading });
 });
 
 // Finished
-router.get('/finished', auth, async (req, res) => {
+router.get('/finished', requireAuth, async (req, res) => {
     const user = await User.findById(req.user.id).populate('finished');
     res.json({ finished: user.finished });
 });
 
 // Favorites
-router.get('/favorites', auth, async (req, res) => {
+router.get('/favorites', requireAuth, async (req, res) => {
     const user = await User.findById(req.user.id).populate('favorites');
     res.json({ favorites: user.favorites });
 });
 
 // Add a book to finished
-router.patch('/users/me/reading/:bookId/finish', auth, async (req, res) => {
+router.patch('/users/me/reading/:bookId/finish', requireAuth, async (req, res) => {
     const { bookId } = req.params;
     if (!mongoose.Types.ObjectId.isValid(bookId)) {
         return res.status(400).json({ message: 'Invalid bookId' });

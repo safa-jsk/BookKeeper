@@ -3,6 +3,8 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const path = require('path');
 require('dotenv').config();
+const ensureAdmin = require('./bootstrap/ensureAdmin');
+const PORT = process.env.PORT || 5000;
 
 const app = express();
 app.use(cors({
@@ -17,7 +19,11 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 // Connect to MongoDB
 mongoose.connect(process.env.MONGO_URI)
-  .then(() => console.log('MongoDB connected'))
+  .then(async () => {
+    console.log('MongoDB connected');
+    await ensureAdmin();
+    app.listen(PORT, () => console.log(`🚀 Server on http://localhost:${PORT}`));
+  })
   .catch(err => console.error(err));
 
 // Books
@@ -32,12 +38,19 @@ app.use('/api/auth', authRoutes);
 const dashboardRoutes = require('./routes/dashboardRoutes');
 app.use('/api/dashboard', dashboardRoutes);
 
-// User
+// User (Reader)
 const userRoutes = require('./routes/userRoutes');
 app.use('/api/user', userRoutes);
 
+// Librarian
+const librarianRoutes = require('./routes/librarianApply');
+app.use('/api/librarian', librarianRoutes);
+
+// Admin
+const adminLibrarianReview = require('./routes/adminLibrarianReview');
+app.use('/api/admin', adminLibrarianReview);
+
 // Start the server (for local development)
-const PORT = process.env.PORT || 5000;
 if (process.env.NODE_ENV !== 'production') {
   app.listen(PORT, () => console.log(`Server started on port ${PORT}`));
 }
