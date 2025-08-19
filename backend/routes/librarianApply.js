@@ -33,4 +33,22 @@ router.get('/my-application', requireAuth, async (req, res) => {
     res.json(appDoc);
 });
 
+// GET /api/librarian/cities  (distinct city list from users)
+router.get('/cities', requireAuth, async (req, res) => {
+    const cities = await User.distinct('city');
+    res.json((cities || []).sort());
+});
+
+// GET /api/librarian/check-phone?phone=...
+router.get('/check-phone', requireAuth, async (req, res) => {
+    const phone = (req.query.phone || '').trim();
+    if (!phone) return res.json({ available: false });
+    const taken = await LibrarianApplication.exists({ ownerPhone: phone });
+    return res.json({ available: !taken });
+});
+
+// POST /api/librarian/apply  (extend your existing handler to accept fields shown above)
+// Validate: genres.length >= 3, unique ownerPhone, termsAccepted === true
+
+
 module.exports = router;

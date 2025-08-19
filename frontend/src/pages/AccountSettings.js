@@ -7,6 +7,7 @@ import {
 import { useTheme, alpha } from '@mui/material/styles';
 import axios from 'axios';
 import dayjs from 'dayjs';
+import LibraryApplicationDialog from '../components/LibraryApplicationDialog';
 
 // Icons
 import SaveIcon from '@mui/icons-material/Save';
@@ -31,6 +32,8 @@ function AccountSettings() {
     const [security, setSecurity] = useState({ currentPassword: '', newPassword: '', confirm: '' });
     const [avatarPreview, setAvatarPreview] = useState(null);
     const [snack, setSnack] = useState({ open: false, severity: 'success', message: '' });
+
+    const [applyOpen, setApplyOpen] = useState(false);
 
     const API = process.env.REACT_APP_API_URL;
     const authHeader = () => ({ headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } });
@@ -169,6 +172,15 @@ function AccountSettings() {
                     </Box>
 
                     <Stack direction="row" spacing={1}>
+                        {!loading && me?.role === 'reader' && (me?.librarianApplicationStatus === 'none' || me?.librarianApplicationStatus === 'rejected') && (
+                            <Button
+                                onClick={() => setApplyOpen(true)}
+                                variant="contained"
+                                sx={{ textTransform: 'none' }}
+                            >
+                                Apply to be a Librarian
+                            </Button>
+                        )}
                         <Button
                             component="label"
                             variant="contained"
@@ -336,6 +348,18 @@ function AccountSettings() {
                     {snack.message}
                 </Alert>
             </Snackbar>
+            <LibraryApplicationDialog
+                open={applyOpen}
+                onClose={() => setApplyOpen(false)}
+                apiBase={API}
+                authHeader={authHeader}
+                defaultCity={profile.city}
+                onSubmitted={() => {
+                    // reflect pending state right away
+                    setMe(m => ({ ...m, librarianApplicationStatus: 'pending' }));
+                    setSnack({ open: true, severity: 'success', message: 'Application submitted. You will be notified after review.' });
+                }}
+            />
         </Box>
     );
 }
