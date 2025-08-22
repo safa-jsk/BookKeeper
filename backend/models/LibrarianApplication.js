@@ -14,7 +14,7 @@ const librarianApplicationSchema = new Schema({
     address2: String,
     city: { type: String, required: true },
     zip: { type: String, required: true },
-    ownerPhone: { type: String, unique: true, index: true },
+    ownerPhone: { type: String, unique: true },
     genres: [{ type: String, required: true }], // min length >= 3 validated in controller
     website: String,          // optional
     about: String,            // optional

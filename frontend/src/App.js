@@ -14,9 +14,19 @@ import Finished from './pages/DashboardFinished';
 import CurrentlyReading from './pages/DashboardCurrentlyReading';
 import Favorites from './pages/DashboardFavorites';
 import AccountSettings from './pages/AccountSettings';
-import Cart from './pages/Cart'; // <-- FIX: was './pages/cart'
+import Cart from './pages/Cart';
+
 import LibrarianInventory from './pages/LibrarianInventory';
 import LibrarianRequests from './pages/LibrarianRequests';
+import LibrarianHomeResolver from './pages/LibrarianHomeResolver';
+
+import AdminLayout from './pages/admin/AdminLayout';
+import AdminLibrarianQueue from './pages/AdminLibrarianQueue';
+import BooksAdmin from './pages/admin/BooksAdmin';
+import InventoryAdmin from './pages/admin/InventoryAdmin';
+import UsersAdmin from './pages/admin/UsersAdmin';
+import LibrariesAdmin from './pages/admin/LibrariesAdmin';
+
 import './styles/styles.css';
 
 function App() {
@@ -45,6 +55,9 @@ function App() {
   const handleLogin = (userObj) => {
     setUser(userObj);
     localStorage.setItem('user', JSON.stringify(userObj));
+    if (userObj.role === 'librarian') {
+      localStorage.setItem('libraryId', userObj.libraryId);
+    }
   };
 
   // Route wrappers
@@ -59,7 +72,7 @@ function App() {
   };
 
   // Optional: client-side role guard (server still enforces)
-  const RequireRole = ({ roles, children }) => {
+  const RequireRole = ({ roles, children, user }) => {
     const token = localStorage.getItem('token');
     if (!token || !user) return <Navigate to="/login" replace />;
     if (!roles.includes(user.role)) return <Navigate to="/" replace />;
@@ -77,7 +90,8 @@ function App() {
         <Route path="/login" element={<Login onLogin={handleLogin} />} />
         <Route path="/register" element={<Register onRegister={handleLogin} />} />
 
-        <Route path="/dashboard/*" element={<DashboardLayout user={user} onLogout={handleLogout} />}>
+        {/* Reader/Librarian dashboard */}
+        <Route path="/dashboard/*" element={<DashboardLayout user={user} />}>
           <Route index element={<DashboardHome user={user} />} />
           <Route path="want-to-read" element={<WantToRead user={user} />} />
           <Route path="finished" element={<Finished user={user} />} />
@@ -86,26 +100,25 @@ function App() {
           <Route path="account-settings" element={<AccountSettings user={user} onLogout={handleLogout} />} />
         </Route>
 
+        {/* Librarian special pages (accessible via drawer links; server still guards) */}
+        <Route path="/librarian/:libraryId/inventory" element={<RequireRole roles={['librarian', 'admin']} user={user}><InventoryRoute /></RequireRole>} />
+        <Route path="/librarian/:libraryId/requests" element={<RequireRole roles={['librarian', 'admin']} user={user}><RequestsRoute /></RequireRole>} />
+        <Route path="/librarian" element={<RequireRole roles={['librarian', 'admin']} user={user}><LibrarianHomeResolver /></RequireRole>} />
+
+        {/* Admin panel */}
+        <Route
+          path="/admin"
+          element={<RequireRole roles={['admin']} user={user}><AdminLayout /></RequireRole>}
+        >
+          <Route index element={<Navigate to="/admin/librarian-applications" replace />} />
+          <Route path="librarian-applications" element={<AdminLibrarianQueue />} />
+          <Route path="books" element={<BooksAdmin />} />
+          <Route path="inventory" element={<InventoryAdmin />} />
+          <Route path="users" element={<UsersAdmin />} />
+          <Route path="libraries" element={<LibrariesAdmin />} />
+        </Route>
+
         <Route path="/cart" element={<Cart />} />
-
-        {/* Librarian tools (guarded on client; server also guards) */}
-        <Route
-          path="/librarian/:libraryId/inventory"
-          element={
-            <RequireRole roles={['librarian', 'admin']}>
-              <InventoryRoute />
-            </RequireRole>
-          }
-        />
-        <Route
-          path="/librarian/:libraryId/requests"
-          element={
-            <RequireRole roles={['librarian', 'admin']}>
-              <RequestsRoute />
-            </RequireRole>
-          }
-        />
-
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Router>

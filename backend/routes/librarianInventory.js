@@ -65,4 +65,12 @@ router.get('/:libraryId/inventory', requireAuth, canManageLibrary(), async (req,
     res.json(rows);
 });
 
+router.get('/my-library', requireAuth, async (req, res) => {
+    const lib = await Library.findOne({ owner: req.user.id }).select('_id name');
+    // If you support managers:
+    // const lib = await Library.findOne({ $or: [{ owner: req.user.id }, { managers: req.user.id }] }).select('_id name');
+    if (!lib) return res.status(404).json({ message: 'No library found' });
+    res.json(lib);
+});
+
 module.exports = router;

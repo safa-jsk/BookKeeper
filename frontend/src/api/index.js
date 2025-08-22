@@ -24,3 +24,13 @@ export const approveRequest = (libraryId, requestId) =>
     axios.patch(`${API}/api/requests/librarian/${libraryId}/requests/${requestId}/approve`, {}, authHeader());
 export const rejectRequest = (libraryId, requestId, note = '') =>
     axios.patch(`${API}/api/requests/librarian/${libraryId}/requests/${requestId}/reject`, { note }, authHeader());
+
+// --- Admin: Librarian applications ---
+export const listLibrarianApps = (status = 'pending') =>
+    axios.get(`${API}/api/admin/librarian-applications`, {
+        ...authHeader(),
+        params: { status }
+    });
+
+export const decideLibrarianApp = (appId, decision, reviewNote = '') =>
+    axios.patch(`${API}/api/admin/librarian-applications/${appId}`, { decision, reviewNote }, authHeader());

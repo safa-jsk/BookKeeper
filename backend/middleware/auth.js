@@ -37,6 +37,7 @@ async function requireAuth(req, res, next) {
             email: user.email,
             role: user.role, // 'reader' | 'librarian' | 'admin'
             librarianApplicationStatus: user.librarianApplicationStatus, // 'none' | 'pending' | 'approved' | 'rejected'
+            libraryId: user.libraryId,
         };
 
         next();

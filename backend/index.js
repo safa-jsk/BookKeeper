@@ -10,6 +10,7 @@ const app = express();
 app.use(cors({
   origin: process.env.FRONTEND_URL,  // Frontend URL (React development server)
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true,
 }));
 app.use(express.json());
@@ -61,6 +62,10 @@ app.use('/api/cart', cartRoutes);
 // Requests
 const requestRoutes = require('./routes/requestRoutes');
 app.use('/api/requests', requestRoutes);
+
+// MyLibrary
+const librarianMyLibrary = require('./routes/librarianMyLibrary');
+app.use('/api/librarian', librarianMyLibrary);
 
 // Start the server (for local development)
 if (process.env.NODE_ENV !== 'production') {
