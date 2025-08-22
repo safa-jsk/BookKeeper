@@ -51,7 +51,13 @@ export default function Navbar({ user, onLogout }) {
   };
 
   return (
-    <AppBar position="sticky" sx={{ backgroundColor: theme.palette.primary.main }}>
+    <AppBar
+      position="sticky"
+      sx={{
+        backgroundColor: theme.palette.primary.main,
+        boxShadow: '0 2px 8px rgba(75,61,45,0.06)',
+        zIndex: (theme) => theme.zIndex.drawer + 1   // <-- keeps AppBar above Drawer
+      }} >
       <Container maxWidth="xl">
         <Toolbar disableGutters sx={{ minHeight: 72 }}>
           <Box component={Link} to="/" sx={{ display: 'flex', alignItems: 'center', textDecoration: 'none', mr: 3 }}>
@@ -62,13 +68,6 @@ export default function Navbar({ user, onLogout }) {
             <Button color="inherit" component={Link} to="/browse" sx={{ textTransform: 'none' }}>Browse Books</Button>
             <Button color="inherit" component={Link} to="/trending" sx={{ textTransform: 'none' }}>Trending</Button>
           </Box>
-
-          {/* Cart icon */}
-          <IconButton color="inherit" component={Link} to="/cart" aria-label="Cart" sx={{ mr: 1 }}>
-            <Badge color="secondary">
-              <ShoppingCartIcon />
-            </Badge>
-          </IconButton>
 
           {/* User dropdown */}
           {effectiveUser && (
@@ -89,6 +88,14 @@ export default function Navbar({ user, onLogout }) {
               </Menu>
             </>
           )}
+
+          {/* Cart icon */}
+          <IconButton color="inherit" component={Link} to="/cart" aria-label="Cart" sx={{ mr: 1 }}>
+            <Badge color="secondary">
+              <ShoppingCartIcon />
+            </Badge>
+          </IconButton>
+
         </Toolbar>
       </Container>
     </AppBar>

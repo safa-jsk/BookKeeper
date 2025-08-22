@@ -5,6 +5,8 @@ const { requireAuth } = require('../middleware/auth');
 const { canManageLibrary } = require('../middleware/libraryGuard');
 const Book = require('../models/Book');
 const Inventory = require('../models/Inventory');
+const Library = require('../models/Library');
+// const LibraryBook = require('../models/LibraryBook');
 
 // Upsert: create book (optional) and add/increase stock in THIS library
 // POST /api/librarian/:libraryId/inventory/add
@@ -66,10 +68,8 @@ router.get('/:libraryId/inventory', requireAuth, canManageLibrary(), async (req,
 });
 
 router.get('/my-library', requireAuth, async (req, res) => {
-    const lib = await Library.findOne({ owner: req.user.id }).select('_id name');
-    // If you support managers:
-    // const lib = await Library.findOne({ $or: [{ owner: req.user.id }, { managers: req.user.id }] }).select('_id name');
-    if (!lib) return res.status(404).json({ message: 'No library found' });
+    const lib = await Library.findOne({ owner: req.user.id });
+    if (!lib) return res.status(404).json({ message: 'Library not found' });
     res.json(lib);
 });
 

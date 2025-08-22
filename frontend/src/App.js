@@ -98,12 +98,11 @@ function App() {
           <Route path="currently-reading" element={<CurrentlyReading user={user} />} />
           <Route path="favorites" element={<Favorites user={user} />} />
           <Route path="account-settings" element={<AccountSettings user={user} onLogout={handleLogout} />} />
-        </Route>
 
-        {/* Librarian special pages (accessible via drawer links; server still guards) */}
-        <Route path="/librarian/:libraryId/inventory" element={<RequireRole roles={['librarian', 'admin']} user={user}><InventoryRoute /></RequireRole>} />
-        <Route path="/librarian/:libraryId/requests" element={<RequireRole roles={['librarian', 'admin']} user={user}><RequestsRoute /></RequireRole>} />
-        <Route path="/librarian" element={<RequireRole roles={['librarian', 'admin']} user={user}><LibrarianHomeResolver /></RequireRole>} />
+          <Route path="librarian" element={<RequireRole roles={['librarian', 'admin']} user={user}><LibrarianHomeResolver /></RequireRole>} />
+          <Route path="librarian/:libraryId/inventory" element={<RequireRole roles={['librarian', 'admin']} user={user}><InventoryRoute /></RequireRole>} />
+          <Route path="librarian/:libraryId/requests" element={<RequireRole roles={['librarian', 'admin']} user={user}><RequestsRoute /></RequireRole>} />
+        </Route>
 
         {/* Admin panel */}
         <Route
