@@ -14,7 +14,7 @@ const librarianApplicationSchema = new Schema({
     address2: String,
     city: { type: String, required: true },
     zip: { type: String, required: true },
-    ownerPhone: { type: String, required: true, unique: true, index: true },
+    ownerPhone: { type: String, unique: true, index: true },
     genres: [{ type: String, required: true }], // min length >= 3 validated in controller
     website: String,          // optional
     about: String,            // optional
@@ -23,3 +23,5 @@ const librarianApplicationSchema = new Schema({
 
 librarianApplicationSchema.index({ applicant: 1, status: 1 });
 librarianApplicationSchema.index({ ownerPhone: 1 }, { unique: true });
+
+module.exports = mongoose.model('LibrarianApplication', librarianApplicationSchema);

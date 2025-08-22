@@ -355,7 +355,6 @@ function AccountSettings() {
                 authHeader={authHeader}
                 defaultCity={profile.city}
                 onSubmitted={() => {
-                    // reflect pending state right away
                     setMe(m => ({ ...m, librarianApplicationStatus: 'pending' }));
                     setSnack({ open: true, severity: 'success', message: 'Application submitted. You will be notified after review.' });
                 }}

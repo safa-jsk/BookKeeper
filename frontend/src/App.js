@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useParams } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Home from './pages/Home';
 import BookList from './components/BookList';
@@ -14,6 +14,9 @@ import Finished from './pages/DashboardFinished';
 import CurrentlyReading from './pages/DashboardCurrentlyReading';
 import Favorites from './pages/DashboardFavorites';
 import AccountSettings from './pages/AccountSettings';
+import Cart from './pages/Cart'; // <-- FIX: was './pages/cart'
+import LibrarianInventory from './pages/LibrarianInventory';
+import LibrarianRequests from './pages/LibrarianRequests';
 import './styles/styles.css';
 
 function App() {
@@ -22,28 +25,45 @@ function App() {
   // Restore user from localStorage
   useEffect(() => {
     const savedUser = localStorage.getItem('user');
-    if (savedUser && savedUser !== "undefined") {
+    if (savedUser && savedUser !== 'undefined') {
       try {
         setUser(JSON.parse(savedUser));
       } catch {
-        setUser(null); // In case of corrupted JSON, fallback to null
+        setUser(null);
       }
     } else {
       setUser(null);
     }
   }, []);
 
-  // Log out function
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     setUser(null);
   };
 
-  // Update: after login/register, save user to both state and localStorage
   const handleLogin = (userObj) => {
     setUser(userObj);
     localStorage.setItem('user', JSON.stringify(userObj));
+  };
+
+  // Route wrappers
+  const InventoryRoute = () => {
+    const { libraryId } = useParams();
+    return <LibrarianInventory libraryId={libraryId} />;
+  };
+
+  const RequestsRoute = () => {
+    const { libraryId } = useParams();
+    return <LibrarianRequests libraryId={libraryId} />;
+  };
+
+  // Optional: client-side role guard (server still enforces)
+  const RequireRole = ({ roles, children }) => {
+    const token = localStorage.getItem('token');
+    if (!token || !user) return <Navigate to="/login" replace />;
+    if (!roles.includes(user.role)) return <Navigate to="/" replace />;
+    return children;
   };
 
   return (
@@ -56,6 +76,7 @@ function App() {
         <Route path="/books/:id" element={<BookDetail />} />
         <Route path="/login" element={<Login onLogin={handleLogin} />} />
         <Route path="/register" element={<Register onRegister={handleLogin} />} />
+
         <Route path="/dashboard/*" element={<DashboardLayout user={user} onLogout={handleLogout} />}>
           <Route index element={<DashboardHome user={user} />} />
           <Route path="want-to-read" element={<WantToRead user={user} />} />
@@ -64,7 +85,28 @@ function App() {
           <Route path="favorites" element={<Favorites user={user} />} />
           <Route path="account-settings" element={<AccountSettings user={user} onLogout={handleLogout} />} />
         </Route>
-        <Route path="*" element={<Home />} />
+
+        <Route path="/cart" element={<Cart />} />
+
+        {/* Librarian tools (guarded on client; server also guards) */}
+        <Route
+          path="/librarian/:libraryId/inventory"
+          element={
+            <RequireRole roles={['librarian', 'admin']}>
+              <InventoryRoute />
+            </RequireRole>
+          }
+        />
+        <Route
+          path="/librarian/:libraryId/requests"
+          element={
+            <RequireRole roles={['librarian', 'admin']}>
+              <RequestsRoute />
+            </RequireRole>
+          }
+        />
+
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Router>
   );

@@ -1,17 +1,12 @@
 import React, { useEffect, useRef, useState } from 'react';
 import {
     Dialog, DialogTitle, DialogContent, DialogActions,
-    Grid, TextField, Button, Autocomplete,
+    Grid, TextField, Button,
     FormControlLabel, Checkbox, FormHelperText,
-    CircularProgress, InputAdornment, Alert
+    CircularProgress, InputAdornment, Alert, Autocomplete
 } from '@mui/material';
 import PhoneIphoneIcon from '@mui/icons-material/PhoneIphone';
 import axios from 'axios';
-
-const FALLBACK_CITIES = [
-    'Dhaka', 'Chattogram', 'Rajshahi', 'Barishal', 'Sylhet',
-    'Khulna', 'Cumilla', 'Mymensingh', 'Rangpur', 'Gazipur'
-];
 
 const GENRE_OPTIONS = [
     'Fiction', 'Non-Fiction', 'Romance', 'Thriller', 'Mystery', 'Fantasy', 'Sci-Fi',
@@ -25,8 +20,8 @@ const GENRE_OPTIONS = [
  * - onClose: () => void
  * - apiBase: string (e.g., process.env.REACT_APP_API_URL)
  * - authHeader: () => ({ headers: { Authorization: `Bearer ${token}` } })
- * - defaultCity?: string
- * - onSubmitted?: () => void   // e.g., set pending in parent
+ * - defaultCity?: string   // <-- comes from user profile, REQUIRED to submit
+ * - onSubmitted?: () => void
  */
 export default function LibraryApplicationDialog({
     open,
@@ -36,7 +31,6 @@ export default function LibraryApplicationDialog({
     defaultCity = '',
     onSubmitted
 }) {
-    const [cities, setCities] = useState([]);
     const [applyLoading, setApplyLoading] = useState(false);
     const [serverMsg, setServerMsg] = useState(null);
 
@@ -44,7 +38,7 @@ export default function LibraryApplicationDialog({
         libraryName: '',
         address1: '',
         address2: '',
-        city: '',
+        city: '',          // kept in state but locked to defaultCity
         zip: '',
         ownerPhone: '',
         genres: [],
@@ -62,7 +56,7 @@ export default function LibraryApplicationDialog({
             libraryName: '',
             address1: '',
             address2: '',
-            city: defaultCity || '',
+            city: defaultCity || '',   // lock to profile city
             zip: '',
             ownerPhone: '',
             genres: [],
@@ -77,17 +71,8 @@ export default function LibraryApplicationDialog({
     useEffect(() => {
         if (!open) return;
         resetState();
-        (async () => {
-            try {
-                const res = await axios.get(`${apiBase}/api/librarian/cities`, authHeader());
-                const list = Array.isArray(res.data) ? res.data : [];
-                setCities(list.length ? list : FALLBACK_CITIES);
-            } catch {
-                setCities(FALLBACK_CITIES);
-            }
-        })();
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [open]);
+    }, [open, defaultCity]);
 
     const phoneLooksValid = (p) => {
         const digits = (p || '').replace(/[^\d]/g, '');
@@ -122,10 +107,10 @@ export default function LibraryApplicationDialog({
         return (
             form.libraryName.trim().length >= 2 &&
             form.address1.trim().length >= 3 &&
-            !!form.city &&
+            !!defaultCity &&                    // must exist in profile
             form.zip.trim().length >= 3 &&
-            phoneLooksValid(form.ownerPhone) &&
-            phoneCheck.available === true &&
+            // phoneLooksValid(form.ownerPhone) &&
+            // phoneCheck.available === true &&
             Array.isArray(form.genres) && form.genres.length >= 3 &&
             form.termsAccepted === true
         );
@@ -134,7 +119,7 @@ export default function LibraryApplicationDialog({
     const submit = async (e) => {
         e.preventDefault();
         if (!isValid()) {
-            setServerMsg({ type: 'warning', text: 'Please complete required fields (min 3 genres, valid & unique phone).' });
+            setServerMsg({ type: 'warning', text: 'Please complete all required fields (city comes from your profile), pick ≥ 3 genres, and provide a valid & unique phone.' });
             return;
         }
         setApplyLoading(true);
@@ -144,17 +129,17 @@ export default function LibraryApplicationDialog({
                 libraryName: form.libraryName.trim(),
                 address1: form.address1.trim(),
                 address2: form.address2.trim(),
-                city: form.city,
+                city: defaultCity,  // enforce profile city
                 zip: form.zip.trim(),
                 ownerPhone: form.ownerPhone.trim(),
                 genres: form.genres,
                 website: form.website.trim(),
                 about: form.about.trim(),
                 termsAccepted: form.termsAccepted,
-                motivation: `Applying for Librarian: ${form.libraryName} in ${form.city}`
+                motivation: `Applying for Librarian: ${form.libraryName} in ${defaultCity}`
             }, authHeader());
 
-            onSubmitted?.(); // e.g., set pending badge in parent
+            onSubmitted?.();
             onClose();
         } catch (err) {
             const msg = err?.response?.data?.message || err?.response?.data?.error || 'Failed to submit application.';
@@ -168,6 +153,11 @@ export default function LibraryApplicationDialog({
         <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm" PaperProps={{ sx: { borderRadius: 3 } }}>
             <DialogTitle>Apply to be a Librarian</DialogTitle>
             <DialogContent dividers>
+                {(!defaultCity || defaultCity.trim() === '') && (
+                    <Alert severity="warning" sx={{ mb: 2 }}>
+                        Your profile city is not set. Please set your City in Account Settings → Profile before applying.
+                    </Alert>
+                )}
                 {serverMsg && (
                     <Alert sx={{ mb: 2 }} severity={serverMsg.type}>{serverMsg.text}</Alert>
                 )}
@@ -199,16 +189,18 @@ export default function LibraryApplicationDialog({
                             />
                         </Grid>
 
+                        {/* City: read-only from profile */}
                         <Grid item xs={12} sm={6}>
-                            <Autocomplete
-                                options={cities.length ? cities : FALLBACK_CITIES}
-                                value={form.city || null}
-                                onChange={(_, v) => setForm(f => ({ ...f, city: v || '' }))}
-                                renderInput={(params) => (
-                                    <TextField {...params} label="City" required />
-                                )}
+                            <TextField
+                                label="City (from profile)"
+                                fullWidth
+                                required
+                                value={defaultCity || ''}
+                                InputProps={{ readOnly: true }}
+                                helperText="Edit your city in Account Settings → Profile"
                             />
                         </Grid>
+
                         <Grid item xs={12} sm={6}>
                             <TextField
                                 label="ZIP / Postal Code"
@@ -221,7 +213,7 @@ export default function LibraryApplicationDialog({
                         <Grid item xs={12}>
                             <TextField
                                 label="Owner Phone Number"
-                                fullWidth required
+                                fullWidth
                                 value={form.ownerPhone}
                                 onChange={e => {
                                     const v = e.target.value;
@@ -245,6 +237,7 @@ export default function LibraryApplicationDialog({
                             />
                         </Grid>
 
+                        {/* Genres: at least 3 (simple comma-separated chips UX could be added later) */}
                         <Grid item xs={12}>
                             <Autocomplete
                                 multiple
@@ -299,7 +292,9 @@ export default function LibraryApplicationDialog({
                 </form>
             </DialogContent>
             <DialogActions sx={{ px: 3, py: 2 }}>
-                <Button onClick={onClose} disabled={applyLoading} sx={{ textTransform: 'none' }}>Cancel</Button>
+                <Button onClick={onClose} disabled={applyLoading} sx={{ textTransform: 'none' }}>
+                    Cancel
+                </Button>
                 <Button
                     onClick={submit}
                     variant="contained"

@@ -9,7 +9,7 @@ const PORT = process.env.PORT || 5000;
 const app = express();
 app.use(cors({
   origin: process.env.FRONTEND_URL,  // Frontend URL (React development server)
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
   credentials: true,
 }));
 app.use(express.json());
@@ -49,6 +49,18 @@ app.use('/api/librarian', librarianRoutes);
 // Admin
 const adminLibrarianReview = require('./routes/adminLibrarianReview');
 app.use('/api/admin', adminLibrarianReview);
+
+// Inventory
+const librarianInventoryRoutes = require('./routes/librarianInventory');
+app.use('/api/librarian', librarianInventoryRoutes);
+
+// Cart
+const cartRoutes = require('./routes/cartRoutes');
+app.use('/api/cart', cartRoutes);
+
+// Requests
+const requestRoutes = require('./routes/requestRoutes');
+app.use('/api/requests', requestRoutes);
 
 // Start the server (for local development)
 if (process.env.NODE_ENV !== 'production') {
