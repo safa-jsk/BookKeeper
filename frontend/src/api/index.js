@@ -17,6 +17,10 @@ export const addInventory = (libraryId, payload) =>
     axios.post(`${API}/api/librarian/${libraryId}/inventory/add`, payload, authHeader());
 export const decreaseInventory = (libraryId, bookId, amount) =>
     axios.patch(`${API}/api/librarian/${libraryId}/inventory/${bookId}/decrease`, { amount }, authHeader());
+export const listLibraryCatalog = (libraryId) =>
+    axios.get(`${API}/api/librarian/${libraryId}/inventory/catalog`, authHeader());
+export const setPrice = (libraryId, bookId, price) =>
+    axios.patch(`${API}/api/librarian/${libraryId}/inventory/${bookId}/price`, { price }, authHeader());
 
 export const listRequests = (libraryId, status = 'pending') =>
     axios.get(`${API}/api/requests/librarian/${libraryId}/requests`, { ...authHeader(), params: { status } });
