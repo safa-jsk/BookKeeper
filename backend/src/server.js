@@ -6,4 +6,4 @@ app.listen(env.PORT, () => {
 });
 
 // If you deploy to Vercel serverless later, you can:
-// module.exports = app;
+module.exports = app;
