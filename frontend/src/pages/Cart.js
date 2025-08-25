@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Box, Card, CardContent, CardHeader, Typography, Stack, IconButton, Button, TextField, Divider, Chip, Dialog, DialogTitle, DialogContent, DialogActions, MenuItem, Snackbar, Alert } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import ShoppingCartCheckoutIcon from '@mui/icons-material/ShoppingCartCheckout';
-import { getCart, addCartItem, removeCartItem, createRequest } from '../api';
+import { getCart, addCartItem, removeCartItem, createRequest } from '../services/api';
 
 export default function Cart() {
     const [cart, setCart] = useState(null);

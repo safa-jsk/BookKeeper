@@ -7,7 +7,7 @@ import CheckIcon from '@mui/icons-material/Check';
 import CloseIcon from '@mui/icons-material/Close';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import SearchIcon from '@mui/icons-material/Search';
-import { listLibrarianApps, decideLibrarianApp } from '../api';
+import { admin } from '../services/api';
 
 const STATUS = ['pending', 'approved', 'rejected'];
 
@@ -23,7 +23,7 @@ export default function AdminLibrarianQueue() {
     const load = useCallback(async () => {
         setLoading(true);
         try {
-            const { data } = await listLibrarianApps(STATUS[tab]);
+            const { data } = await admin.listLibrarianApps(STATUS[tab]);
             setRows(data || []);
         } catch (e) {
             setSnack({ open: true, severity: 'error', message: 'Failed to load applications' });
@@ -54,7 +54,7 @@ export default function AdminLibrarianQueue() {
 
     const decide = async () => {
         try {
-            await decideLibrarianApp(confirm.id, confirm.action, confirm.note);
+            await admin.decideLibrarianApp(confirm.id, confirm.action, confirm.note);
             setSnack({ open: true, severity: 'success', message: confirm.action === 'approve' ? 'Approved' : 'Rejected' });
             closeConfirm();
             load();

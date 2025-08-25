@@ -21,6 +21,7 @@ export default function LeftDrawer({ user }) {
     const isSelected = (to) => {
         // Reader pages: exact match
         if (
+            to === '/dashboard' ||
             to === '/dashboard/want-to-read' ||
             to === '/dashboard/currently-reading' ||
             to === '/dashboard/favorites' ||
@@ -44,6 +45,7 @@ export default function LeftDrawer({ user }) {
     };
 
     const items = [
+        { label: 'Dashboard', to: '/dashboard', show: true },
         { label: 'Want to Read', to: '/dashboard/want-to-read', show: true },
         { label: 'Currently Reading', to: '/dashboard/currently-reading', show: true },
         { label: 'Favorites', to: '/dashboard/favorites', show: true },

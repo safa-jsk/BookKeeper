@@ -7,25 +7,26 @@ import BookDetail from './components/BookDetail';
 import Trending from './pages/Trending';
 import Login from './pages/Login';
 import Register from './pages/Register';
-import DashboardLayout from './pages/DashboardLayout';
-import DashboardHome from './pages/DashboardHome';
-import WantToRead from './pages/DashboardWantToRead';
-import Finished from './pages/DashboardFinished';
-import CurrentlyReading from './pages/DashboardCurrentlyReading';
-import Favorites from './pages/DashboardFavorites';
 import AccountSettings from './pages/AccountSettings';
 import Cart from './pages/Cart';
 
-import LibrarianInventory from './pages/LibrarianInventory';
-import LibrarianRequests from './pages/LibrarianRequests';
-import LibrarianHomeResolver from './pages/LibrarianHomeResolver';
+import DashboardLayout from './pages/dashboard/Layout';
+import DashboardHome from './pages/dashboard/Home';
+import WantToRead from './pages/dashboard/WantToRead';
+import Finished from './pages/dashboard/Finished';
+import CurrentlyReading from './pages/dashboard/CurrentlyReading';
+import Favorites from './pages/dashboard/Favorites';
 
-import AdminLayout from './pages/admin/AdminLayout';
+import LibrarianInventory from './pages/librarian/Inventory';
+import LibrarianRequests from './pages/librarian/Requests';
+import LibrarianHomeResolver from './pages/librarian/HomeResolver';
+
+import AdminLayout from './pages/admin/Layout';
 import AdminLibrarianQueue from './pages/AdminLibrarianQueue';
-import BooksAdmin from './pages/admin/BooksAdmin';
-import InventoryAdmin from './pages/admin/InventoryAdmin';
-import UsersAdmin from './pages/admin/UsersAdmin';
-import LibrariesAdmin from './pages/admin/LibrariesAdmin';
+import BooksAdmin from './pages/admin/Books';
+import InventoryAdmin from './pages/admin/Inventory';
+import UsersAdmin from './pages/admin/Users';
+import LibrariesAdmin from './pages/admin/Libraries';
 
 import './styles/styles.css';
 
