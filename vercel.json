@@ -9,7 +9,7 @@
       }
     },
     {
-      "src": "backend/index.js",
+      "src": "backend/src/server.js",
       "use": "@vercel/node"
     }
   ],
@@ -17,7 +17,7 @@
     "MONGO_URI": "mongodb+srv://jabirsafakhandoker:j4a3b2i1r0@bookkeepercluster.xpx6uiz.mongodb.net/bookkeeper?retryWrites=true&w=majority",
     "JWT_SECRET": "supersecretkey",
     "FRONTEND_URL": "https://book-keeper-470.vercel.app",
-    "REACT_APP_API_URL": "https://book-keeper-e99r.vercel.app"
+    "REACT_APP_API_URL": "https://book-keeper-server.vercel.app"
   },
   "rewrites": [
     {
