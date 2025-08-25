@@ -1,9 +1,10 @@
-const env = require('./config/env');
+// backend/src/server.js
 const app = require('./app');
+const env = require('./config/env');
 
-app.listen(env.PORT, () => {
-    console.log(`🚀 Server running on http://localhost:${env.PORT} [${env.NODE_ENV}]`);
+const PORT = process.env.PORT || env.PORT || 5000;
+
+// IMPORTANT on Render: bind to 0.0.0.0 and use the provided PORT
+app.listen(PORT, '0.0.0.0', () => {
+    console.log(`🚀 API listening on port ${PORT}`);
 });
-
-// If you deploy to Vercel serverless later, you can:
-module.exports = app;
