@@ -118,6 +118,11 @@ export const admin = {
     createLibrary: (payload) => api.post('/admin/libraries', payload),
     updateLibrary: (id, payload) => api.put(`/admin/libraries/${id}`, payload),
     deleteLibrary: (id) => api.delete(`/admin/libraries/${id}`),
+    // CRUD: Inventories
+    listInventories: () => api.get('/admin/inventories'),
+    createInventory: (payload) => api.post('/admin/inventories', payload),
+    updateInventory: (id, payload) => api.put(`/admin/inventories/${id}`, payload),
+    deleteInventory: (id) => api.delete(`/admin/inventories/${id}`),
 };
 
 // convenience re-exports for legacy imports
@@ -130,8 +135,6 @@ export const addCartItem = (bookId, quantity = 1) => cart.addOrUpdateItem(bookId
 export const removeCartItem = (bookId) => cart.removeItem(bookId);
 
 export const createRequest = (libraryId, items) => requests.create(libraryId, items);
-export const delayRequest = (libraryId, requestId, days, note) => requests.delay(libraryId, requestId, days, note);
-export const listMyRequests = (status) => requests.listMine(status);
 
 export const listLibraryInventory = (libraryId) => inventory.list(libraryId);
 export const addInventory = (libraryId, payload) => inventory.addOrIncrease(libraryId, payload);
@@ -140,3 +143,6 @@ export const listLibraryCatalog = (libraryId) => inventory.catalog(libraryId);
 
 // this one works only if you implement the backend route (see note below)
 export const setPrice = (libraryId, bookId, price) => inventory.setPrice(libraryId, bookId, price);
+
+export const delayRequest = (libraryId, requestId, days, note) => requests.delay(libraryId, requestId, days, note);
+export const listMyRequests = (status) => requests.listMine(status);

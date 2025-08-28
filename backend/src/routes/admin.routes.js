@@ -41,4 +41,10 @@ router.post('/libraries', requireAuth, requireAdmin, ctrl.adminCreateLibrary);
 router.put('/libraries/:id', requireAuth, requireAdmin, ctrl.adminUpdateLibrary);
 router.delete('/libraries/:id', requireAuth, requireAdmin, ctrl.adminDeleteLibrary);
 
+// ----- Admin CRUD: Inventories -----
+router.get('/inventories', requireAuth, requireAdmin, ctrl.adminListInventories);
+router.post('/inventories', requireAuth, requireAdmin, ctrl.adminCreateInventory);
+router.put('/inventories/:id', requireAuth, requireAdmin, ctrl.adminUpdateInventory);
+router.delete('/inventories/:id', requireAuth, requireAdmin, ctrl.adminDeleteInventory);
+
 module.exports = router;

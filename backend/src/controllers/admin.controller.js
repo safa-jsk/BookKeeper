@@ -2,6 +2,7 @@ const LibrarianApplication = require('../models/LibrarianApplication');
 const User = require('../models/User');
 const Library = require('../models/Library');
 const Book = require('../models/Book');
+const Inventory = require('../models/Inventory');
 
 /**
  * GET /api/admin/librarian-applications?status=pending|approved|rejected
@@ -80,6 +81,47 @@ exports.adminUpdateLibrary = async (req, res, next) => {
 };
 exports.adminDeleteLibrary = async (req, res, next) => {
     try { await Library.findByIdAndDelete(req.params.id); res.json({ ok: true }); } catch (e) { next(e); }
+};
+
+// ---- Admin CRUD: Inventories ----
+exports.adminListInventories = async (_req, res, next) => {
+    try {
+        const rows = await Inventory.find()
+            .populate('library', 'name city zip')
+            .populate('book', 'title author genre isbn year')
+            .sort({ 'library.name': 1, 'book.title': 1 });
+        res.json(rows);
+    } catch (e) { next(e); }
+};
+
+exports.adminCreateInventory = async (req, res, next) => {
+    try {
+        const { library, book, stock = 0, price } = req.body;
+        const doc = await Inventory.create({ library, book, stock, price });
+        const populated = await Inventory.findById(doc._id)
+            .populate('library', 'name city zip')
+            .populate('book', 'title author genre isbn year');
+        res.status(201).json(populated);
+    } catch (e) { next(e); }
+};
+
+exports.adminUpdateInventory = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        const { stock, price } = req.body;
+        const doc = await Inventory.findByIdAndUpdate(id, { stock, price, lastUpdatedAt: new Date() }, { new: true })
+            .populate('library', 'name city zip')
+            .populate('book', 'title author genre isbn year');
+        if (!doc) return res.status(404).json({ message: 'Inventory not found' });
+        res.json(doc);
+    } catch (e) { next(e); }
+};
+
+exports.adminDeleteInventory = async (req, res, next) => {
+    try {
+        await Inventory.findByIdAndDelete(req.params.id);
+        res.json({ ok: true });
+    } catch (e) { next(e); }
 };
 
 /**
