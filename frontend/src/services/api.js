@@ -103,6 +103,21 @@ export const admin = {
     listLibrarianApps: (status = 'pending') => api.get('/admin/librarian-applications', { params: { status } }),
     decideLibrarianApp: (id, decision, reviewNote = '') =>
         api.patch(`/admin/librarian-applications/${id}`, { decision, reviewNote }),
+    // CRUD: Users
+    listUsers: () => api.get('/admin/users'),
+    createUser: (payload) => api.post('/admin/users', payload),
+    updateUser: (id, payload) => api.put(`/admin/users/${id}`, payload),
+    deleteUser: (id) => api.delete(`/admin/users/${id}`),
+    // CRUD: Books
+    listBooks: () => api.get('/admin/books'),
+    createBook: (payload) => api.post('/admin/books', payload),
+    updateBook: (id, payload) => api.put(`/admin/books/${id}`, payload),
+    deleteBook: (id) => api.delete(`/admin/books/${id}`),
+    // CRUD: Libraries
+    listLibraries: () => api.get('/admin/libraries'),
+    createLibrary: (payload) => api.post('/admin/libraries', payload),
+    updateLibrary: (id, payload) => api.put(`/admin/libraries/${id}`, payload),
+    deleteLibrary: (id) => api.delete(`/admin/libraries/${id}`),
 };
 
 // convenience re-exports for legacy imports
