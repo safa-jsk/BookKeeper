@@ -111,3 +111,47 @@ exports.reject = async (req, res, next) => {
         res.json(reqDoc);
     } catch (e) { next(e); }
 };
+
+/** PATCH /api/requests/librarian/:libraryId/requests/:id/delay
+ * body: { days, note }
+ */
+exports.delay = async (req, res, next) => {
+    try {
+        const reqDoc = await Request.findOne({
+            _id: req.params.id,
+            library: req.params.libraryId,
+        });
+
+        if (!reqDoc) return res.status(404).json({ message: 'Request not found' });
+        if (reqDoc.status !== 'pending') {
+            return res.status(400).json({ message: `Request already ${reqDoc.status}` });
+        }
+
+        const days = Number(req.body.days);
+        const now = new Date();
+        const expectedAt = new Date(now.getTime() + days * 24 * 60 * 60 * 1000);
+
+        reqDoc.status = 'delayed';
+        reqDoc.decidedBy = req.user.id;
+        reqDoc.decidedAt = now;
+        reqDoc.expectedAt = expectedAt;
+        reqDoc.note = req.body.note || reqDoc.note;
+        await reqDoc.save();
+
+        res.json(reqDoc);
+    } catch (e) { next(e); }
+};
+
+/** GET /api/requests/my?status=... */
+exports.listMine = async (req, res, next) => {
+    try {
+        const { status } = req.query;
+        const query = { user: req.user.id };
+        if (status) query.status = status;
+        const list = await Request.find(query)
+            .populate('library', 'name address1 address2 city zip')
+            .populate('items.book', 'title author')
+            .sort({ createdAt: -1 });
+        res.json(list);
+    } catch (e) { next(e); }
+};

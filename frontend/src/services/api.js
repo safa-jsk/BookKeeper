@@ -45,6 +45,9 @@ export const requests = {
         api.patch(`/requests/librarian/${libraryId}/requests/${requestId}/approve`),
     reject: (libraryId, requestId, note = '') =>
         api.patch(`/requests/librarian/${libraryId}/requests/${requestId}/reject`, { note }),
+    delay: (libraryId, requestId, days, note = '') =>
+        api.patch(`/requests/librarian/${libraryId}/requests/${requestId}/delay`, { days, note }),
+    listMine: (status) => api.get('/requests/my', { params: status ? { status } : {} }),
 };
 
 // ------- LIBRARIAN (applications + my-library) -------
@@ -112,6 +115,8 @@ export const addCartItem = (bookId, quantity = 1) => cart.addOrUpdateItem(bookId
 export const removeCartItem = (bookId) => cart.removeItem(bookId);
 
 export const createRequest = (libraryId, items) => requests.create(libraryId, items);
+export const delayRequest = (libraryId, requestId, days, note) => requests.delay(libraryId, requestId, days, note);
+export const listMyRequests = (status) => requests.listMine(status);
 
 export const listLibraryInventory = (libraryId) => inventory.list(libraryId);
 export const addInventory = (libraryId, payload) => inventory.addOrIncrease(libraryId, payload);

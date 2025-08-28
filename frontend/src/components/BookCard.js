@@ -1,9 +1,11 @@
 import React from 'react';
-import { Card, CardContent, CardMedia, Typography, Button, Stack } from '@mui/material';
+import { Card, CardContent, CardMedia, Typography, Button, Stack, IconButton, Tooltip } from '@mui/material';
+import AddShoppingCartIcon from '@mui/icons-material/AddShoppingCart';
+import { addCartItem } from '../services/api';
 import { Link } from 'react-router-dom';
 import { useTheme } from '@mui/material/styles';
 
-export default function BookCard({ book, onRemove, onReview, onAddToFinished }) {
+export default function BookCard({ book, onRemove, onReview, onAddToFinished, onAddedToCart }) {
     const theme = useTheme();
     return (
         <Card
@@ -63,23 +65,38 @@ export default function BookCard({ book, onRemove, onReview, onAddToFinished }) 
             </CardContent>
 
             <Stack direction="column" spacing={1} sx={{ p: 2, pt: 0 }}>
-                <Button
-                    size="small"
-                    component={Link}
-                    to={`/books/${book._id}`}
-                    color="primary"
-                    sx={{
-                        borderRadius: 2,
-                        background: theme.palette.primary.main,
-                        color: '#fff',
-                        fontWeight: 600,
-                        letterSpacing: 1,
-                        transition: 'background 0.18s',
-                        '&:hover': { background: theme.palette.secondary.main }
-                    }}
-                >
-                    View Details
-                </Button>
+                <Stack direction="row" justifyContent="space-between" alignItems="center">
+                    <Button
+                        size="small"
+                        component={Link}
+                        to={`/books/${book._id}`}
+                        color="primary"
+                        sx={{
+                            borderRadius: 2,
+                            background: theme.palette.primary.main,
+                            color: '#fff',
+                            fontWeight: 600,
+                            letterSpacing: 1,
+                            transition: 'background 0.18s',
+                            '&:hover': { background: theme.palette.secondary.main }
+                        }}
+                    >
+                        View Details
+                    </Button>
+                    <Tooltip title="Add to Cart">
+                        <IconButton
+                            color="primary"
+                            onClick={async () => {
+                                try {
+                                    await addCartItem(book._id, 1);
+                                    onAddedToCart && onAddedToCart(book);
+                                } catch (_) { }
+                            }}
+                        >
+                            <AddShoppingCartIcon />
+                        </IconButton>
+                    </Tooltip>
+                </Stack>
 
                 {onRemove && (
                     <Button

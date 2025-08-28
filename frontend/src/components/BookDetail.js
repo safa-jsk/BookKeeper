@@ -5,6 +5,8 @@ import axios from 'axios';
 import {
   Grid, CardMedia, Typography, Button, Box, TextField, Divider, Paper, Stack, Snackbar, Alert
 } from '@mui/material';
+import AddShoppingCartIcon from '@mui/icons-material/AddShoppingCart';
+import { addCartItem } from '../services/api';
 
 const CATEGORIES = [
   { key: 'wantToRead', label: 'Want to Read' },
@@ -240,6 +242,22 @@ function BookDetail() {
             />
             {/* Buttons go below the image */}
             <Stack direction="column" spacing={2} sx={{ my: 2, width: '90%' }}>
+              <Button
+                variant="contained"
+                color="primary"
+                startIcon={<AddShoppingCartIcon />}
+                onClick={async () => {
+                  try {
+                    await addCartItem(book._id, 1);
+                    setSnackbar({ open: true, message: 'Added to cart', severity: 'success' });
+                  } catch (e) {
+                    setSnackbar({ open: true, message: 'Failed to add to cart', severity: 'error' });
+                  }
+                }}
+                sx={{ textTransform: 'none', fontWeight: 600 }}
+              >
+                Add to Cart
+              </Button>
               {CATEGORIES.map(cat => {
                 const inCat = isBookInCategory(cat.key);
                 return (

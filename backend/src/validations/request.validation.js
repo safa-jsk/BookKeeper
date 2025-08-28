@@ -22,9 +22,14 @@ exports.paramsLibAndReq = Joi.object({
 });
 
 exports.statusQuery = Joi.object({
-    status: Joi.string().valid('pending', 'approved', 'rejected').default('pending'),
+    status: Joi.string().valid('pending', 'approved', 'rejected', 'delayed').default('pending'),
 });
 
 exports.rejectBody = Joi.object({
+    note: Joi.string().allow('', null),
+});
+
+exports.delayBody = Joi.object({
+    days: Joi.number().integer().min(1).max(365).required(),
     note: Joi.string().allow('', null),
 });

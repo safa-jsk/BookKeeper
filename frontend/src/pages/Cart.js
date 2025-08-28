@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Box, Card, CardContent, CardHeader, Typography, Stack, IconButton, Button, TextField, Divider, Chip, Dialog, DialogTitle, DialogContent, DialogActions, MenuItem, Snackbar, Alert } from '@mui/material';
+import { Box, Card, CardContent, CardHeader, Typography, Stack, IconButton, Button, TextField, Divider, Chip, Dialog, DialogTitle, DialogContent, DialogActions, MenuItem, Snackbar, Alert, Collapse } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import ShoppingCartCheckoutIcon from '@mui/icons-material/ShoppingCartCheckout';
 import { getCart, addCartItem, removeCartItem, createRequest } from '../services/api';
@@ -11,6 +11,7 @@ export default function Cart() {
     const [checkoutOpen, setCheckoutOpen] = useState(false);
     const [chosenLibrary, setChosenLibrary] = useState('');
     const [submitting, setSubmitting] = useState(false);
+    const [openLibraries, setOpenLibraries] = useState({});
 
     const load = async () => {
         const { data } = await getCart();
@@ -82,22 +83,30 @@ export default function Cart() {
                                                 <Box>
                                                     <Typography variant="h6">{b.title}</Typography>
                                                     <Typography variant="body2" color="text.secondary">{b.author} · {b.genre}</Typography>
-                                                    <Stack direction="row" spacing={1} mt={1} flexWrap="wrap">
-                                                        {libs.length === 0 ? (
-                                                            <Chip size="small" label="Not available in any library" />
-                                                        ) : libs.map(lib => (
-                                                            <Chip
-                                                                key={lib.libraryId}
-                                                                size="small"
-                                                                label={`${lib.libraryName} — stock: ${lib.stock}`}
-                                                                variant="outlined"
-                                                                title={`${lib.address}`}
-                                                            />
-                                                        ))}
-                                                    </Stack>
-                                                    <Typography variant="caption" color="text.secondary">
-                                                        Hover library chip to see address.
-                                                    </Typography>
+                                                    <Button size="small" onClick={() => setOpenLibraries(s => ({ ...s, [b._id]: !s[b._id] }))} sx={{ mt: 1 }}>
+                                                        {openLibraries[b._id] ? 'Hide Libraries' : 'Show Libraries'}
+                                                    </Button>
+                                                    <Collapse in={!!openLibraries[b._id]}>
+                                                        <Stack spacing={1} mt={1}>
+                                                            {libs.length === 0 ? (
+                                                                <Typography color="text.secondary">Not available in any library</Typography>
+                                                            ) : libs.map(lib => (
+                                                                <Stack key={lib.libraryId} direction="row" alignItems="center" justifyContent="space-between" sx={{ border: '1px solid #eee', borderRadius: 1, p: 1 }}>
+                                                                    <Box>
+                                                                        <Typography variant="body2" fontWeight={600}>{lib.libraryName}</Typography>
+                                                                        <Typography variant="caption" color="text.secondary">{lib.address}</Typography>
+                                                                    </Box>
+                                                                    <Stack direction="row" spacing={1} alignItems="center">
+                                                                        <Chip size="small" label={`Stock: ${lib.stock}`} />
+                                                                        <Button size="small" variant="outlined" onClick={() => {
+                                                                            setChosenLibrary(lib.libraryId);
+                                                                            setCheckoutOpen(true);
+                                                                        }}>Request Book</Button>
+                                                                    </Stack>
+                                                                </Stack>
+                                                            ))}
+                                                        </Stack>
+                                                    </Collapse>
                                                 </Box>
 
                                                 <Stack direction="row" spacing={1} alignItems="center">

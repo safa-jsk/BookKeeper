@@ -41,4 +41,21 @@ router.patch('/librarian/:libraryId/requests/:id/reject',
     ctrl.reject
 );
 
+// Delay a request
+router.patch('/librarian/:libraryId/requests/:id/delay',
+    requireAuth,
+    requireRole('librarian', 'admin'),
+    canManageLibrary(),
+    validate(v.paramsLibAndReq, 'params'),
+    validate(v.delayBody),
+    ctrl.delay
+);
+
+// List my requests (user)
+router.get('/my',
+    requireAuth,
+    validate(v.statusQuery, 'query'),
+    ctrl.listMine
+);
+
 module.exports = router;

@@ -1,10 +1,13 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { Box, Card, CardHeader, CardContent, Stack, Typography, Button, Snackbar, Alert } from '@mui/material';
+import { Box, Card, CardHeader, CardContent, Stack, Typography, Button, Snackbar, Alert, Dialog, DialogTitle, DialogContent, DialogActions, TextField } from '@mui/material';
 import { requests } from '../../services/api';
 
 export default function LibrarianRequests({ libraryId }) {
     const [rows, setRows] = useState([]);
     const [snack, setSnack] = useState({ open: false, severity: 'success', message: '' });
+    const [delayOpen, setDelayOpen] = useState(false);
+    const [delayDays, setDelayDays] = useState(3);
+    const [delayTarget, setDelayTarget] = useState(null);
 
     const load = useCallback(async () => {
         const { data } = await requests.listForLibrary(libraryId, 'pending');
@@ -35,6 +38,23 @@ export default function LibrarianRequests({ libraryId }) {
         }
     };
 
+    const openDelay = (id) => {
+        setDelayTarget(id);
+        setDelayDays(3);
+        setDelayOpen(true);
+    };
+
+    const confirmDelay = async () => {
+        try {
+            await requests.delay(libraryId, delayTarget, Number(delayDays));
+            setSnack({ open: true, severity: 'warning', message: 'Request delayed' });
+            setRows(rows => rows.filter(r => r._id !== delayTarget));
+            setDelayOpen(false);
+        } catch (e) {
+            setSnack({ open: true, severity: 'error', message: e?.response?.data?.message || 'Failed to delay' });
+        }
+    };
+
     return (
         <Box p={3}>
             <Card>
@@ -62,6 +82,7 @@ export default function LibrarianRequests({ libraryId }) {
                                         <Stack direction="row" spacing={1}>
                                             <Button onClick={() => approve(req._id)} variant="contained">Approve</Button>
                                             <Button onClick={() => reject(req._id)} color="error" variant="outlined">Reject</Button>
+                                            <Button onClick={() => openDelay(req._id)} color="warning" variant="outlined">Delay</Button>
                                         </Stack>
                                     </Stack>
                                 </CardContent>
@@ -70,6 +91,26 @@ export default function LibrarianRequests({ libraryId }) {
                     </Stack>
                 </CardContent>
             </Card>
+
+            <Dialog open={delayOpen} onClose={() => setDelayOpen(false)}>
+                <DialogTitle>Delay Request</DialogTitle>
+                <DialogContent>
+                    <TextField
+                        autoFocus
+                        margin="dense"
+                        label="Delay (days)"
+                        type="number"
+                        fullWidth
+                        value={delayDays}
+                        onChange={e => setDelayDays(e.target.value)}
+                        inputProps={{ min: 1, max: 365 }}
+                    />
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setDelayOpen(false)}>Cancel</Button>
+                    <Button onClick={confirmDelay} variant="contained">Confirm Delay</Button>
+                </DialogActions>
+            </Dialog>
 
             <Snackbar open={snack.open} autoHideDuration={2600} onClose={() => setSnack(s => ({ ...s, open: false }))}>
                 <Alert severity={snack.severity} onClose={() => setSnack(s => ({ ...s, open: false }))}>{snack.message}</Alert>
