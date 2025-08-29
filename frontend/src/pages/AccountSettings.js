@@ -27,7 +27,7 @@ function AccountSettings() {
     const [me, setMe] = useState(null);
 
     const [profile, setProfile] = useState({
-        firstName: '', lastName: '', gender: 'Male', dob: '', city: '', email: ''
+        firstName: '', lastName: '', gender: 'Male', dob: '', city: '', email: '', theme: 'scholarly'
     });
     const [security, setSecurity] = useState({ currentPassword: '', newPassword: '', confirm: '' });
     const [avatarPreview, setAvatarPreview] = useState(null);
@@ -57,7 +57,8 @@ function AccountSettings() {
                     gender: res.data.gender || 'Male',
                     dob: res.data.dob ? dayjs(res.data.dob).format('YYYY-MM-DD') : '',
                     city: res.data.city || '',
-                    email: res.data.email || ''
+                    email: res.data.email || '',
+                    theme: res.data.theme || 'scholarly'
                 });
             } catch {
                 setSnack({ open: true, severity: 'error', message: 'Failed to load profile.' });
@@ -71,13 +72,21 @@ function AccountSettings() {
     const onSaveProfile = async (e) => {
         e.preventDefault();
         try {
-            await axios.put(`${API}/api/user/me`, {
+            const resp = await axios.put(`${API}/api/user/me`, {
                 firstName: profile.firstName,
                 lastName: profile.lastName,
                 gender: profile.gender,
                 dob: profile.dob,
-                city: profile.city
+                city: profile.city,
+                theme: profile.theme
             }, authHeader());
+            // Persist theme locally and notify app to apply without reload
+            try {
+                const saved = JSON.parse(localStorage.getItem('user') || '{}');
+                saved.theme = resp?.data?.theme || profile.theme;
+                localStorage.setItem('user', JSON.stringify(saved));
+                window.dispatchEvent(new Event('user-theme-updated'));
+            } catch { }
             setSnack({ open: true, severity: 'success', message: 'Profile updated.' });
         } catch {
             setSnack({ open: true, severity: 'error', message: 'Could not update profile.' });
@@ -264,6 +273,24 @@ function AccountSettings() {
                                         </Grid>
                                         <Grid item xs={12} sm={6}>
                                             <TextField label="Email" fullWidth disabled value={profile.email} />
+                                        </Grid>
+                                        <Grid item xs={12} sm={6}>
+                                            <TextField
+                                                select
+                                                label="Theme"
+                                                fullWidth
+                                                value={profile.theme}
+                                                onChange={e => setProfile({ ...profile, theme: e.target.value })}
+                                            >
+                                                <MenuItem value="scholarly">Scholarly Vibes — #4B3D2D</MenuItem>
+                                                <MenuItem value="modernElegance">Modern Elegance — #3A2C2F</MenuItem>
+                                                <MenuItem value="coastalCalm">Coastal Calm — #2E4053</MenuItem>
+                                                <MenuItem value="rusticCharm">Rustic Charm — #4A3C2A</MenuItem>
+                                                <MenuItem value="blueSerenity">Blue Serenity — #2C3E50</MenuItem>
+                                                <MenuItem value="redPassion">Red Passion — #C0392B</MenuItem>
+                                                <MenuItem value="blackWhite">Black & White — #000000</MenuItem>
+                                                <MenuItem value="darkMode">Dark Mode — #121212</MenuItem>
+                                            </TextField>
                                         </Grid>
                                     </Grid>
 

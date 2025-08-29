@@ -34,22 +34,44 @@ import LibrariesAdmin from './pages/admin/Libraries';
 import RequestsAdmin from './pages/admin/Requests';
 
 import './styles/styles.css';
+import { ThemeProvider } from '@mui/material/styles';
+import baseTheme, { buildTheme, THEMES } from './theme';
+import { CssBaseline } from '@mui/material';
 
 function App() {
   const [user, setUser] = useState(null);
+  const [activeTheme, setActiveTheme] = useState(baseTheme);
 
   // Restore user from localStorage
   useEffect(() => {
     const savedUser = localStorage.getItem('user');
     if (savedUser && savedUser !== 'undefined') {
       try {
-        setUser(JSON.parse(savedUser));
+        const u = JSON.parse(savedUser);
+        setUser(u);
+        const key = u?.theme || 'scholarly';
+        const palette = THEMES[key] || THEMES.scholarly;
+        setActiveTheme(buildTheme(palette));
       } catch {
         setUser(null);
       }
     } else {
       setUser(null);
     }
+  }, []);
+
+  // Listen for theme updates without full reload
+  useEffect(() => {
+    const onThemeUpdated = () => {
+      try {
+        const savedUser = JSON.parse(localStorage.getItem('user') || '{}');
+        const key = savedUser?.theme || 'scholarly';
+        const palette = THEMES[key] || THEMES.scholarly;
+        setActiveTheme(buildTheme(palette));
+      } catch { }
+    };
+    window.addEventListener('user-theme-updated', onThemeUpdated);
+    return () => window.removeEventListener('user-theme-updated', onThemeUpdated);
   }, []);
 
   const handleLogout = () => {
@@ -65,6 +87,9 @@ function App() {
   const handleLogin = (userObj) => {
     setUser(userObj);
     localStorage.setItem('user', JSON.stringify(userObj));
+    const key = userObj?.theme || 'scholarly';
+    const palette = THEMES[key] || THEMES.scholarly;
+    setActiveTheme(buildTheme(palette));
     if (userObj.role === 'librarian') {
       localStorage.setItem('libraryId', userObj.libraryId);
     }
@@ -125,52 +150,55 @@ function App() {
   };
 
   return (
-    <Router>
-      <Navbar user={user} onLogout={handleLogout} />
-      <Routes>
-        <Route path="/" element={<Home onLogin={handleLogin} user={user} />} />
-        <Route path="/browse" element={<BookList />} />
-        <Route path="/hakla" element={<Hakla />} />
-        <Route path="/trending" element={<Trending />} />
-        <Route path="/ai-search" element={<AISearch />} />
-        <Route path="/books/:id" element={<BookDetail />} />
-        <Route path="/login" element={<Login onLogin={handleLogin} />} />
-        <Route path="/register" element={<Register onRegister={handleLogin} />} />
-        <Route path="/map" element={<Map />} />
+    <ThemeProvider theme={activeTheme}>
+      <CssBaseline />
+      <Router>
+        <Navbar user={user} onLogout={handleLogout} />
+        <Routes>
+          <Route path="/" element={<Home onLogin={handleLogin} user={user} />} />
+          <Route path="/browse" element={<BookList />} />
+          <Route path="/hakla" element={<Hakla />} />
+          <Route path="/trending" element={<Trending />} />
+          <Route path="/ai-search" element={<AISearch />} />
+          <Route path="/books/:id" element={<BookDetail />} />
+          <Route path="/login" element={<Login onLogin={handleLogin} />} />
+          <Route path="/register" element={<Register onRegister={handleLogin} />} />
+          <Route path="/map" element={<Map />} />
 
-        {/* Reader/Librarian dashboard */}
-        <Route path="/dashboard/*" element={<DashboardLayout user={user} />}>
-          <Route index element={<DashboardHome user={user} />} />
-          <Route path="want-to-read" element={<WantToRead user={user} />} />
-          <Route path="finished" element={<Finished user={user} />} />
-          <Route path="currently-reading" element={<CurrentlyReading user={user} />} />
-          <Route path="favorites" element={<Favorites user={user} />} />
-          <Route path="account-settings" element={<AccountSettings user={user} onLogout={handleLogout} />} />
+          {/* Reader/Librarian dashboard */}
+          <Route path="/dashboard/*" element={<DashboardLayout user={user} />}>
+            <Route index element={<DashboardHome user={user} />} />
+            <Route path="want-to-read" element={<WantToRead user={user} />} />
+            <Route path="finished" element={<Finished user={user} />} />
+            <Route path="currently-reading" element={<CurrentlyReading user={user} />} />
+            <Route path="favorites" element={<Favorites user={user} />} />
+            <Route path="account-settings" element={<AccountSettings user={user} onLogout={handleLogout} />} />
 
-          <Route path="librarian" element={<RequireRole roles={['librarian', 'admin']} user={user}><LibrarianHomeResolver /></RequireRole>} />
-          <Route path="librarian/:libraryId/inventory" element={<RequireRole roles={['librarian', 'admin']} user={user}><InventoryRoute /></RequireRole>} />
-          <Route path="librarian/:libraryId/requests" element={<RequireRole roles={['librarian', 'admin']} user={user}><RequestsRoute /></RequireRole>} />
-        </Route>
+            <Route path="librarian" element={<RequireRole roles={['librarian', 'admin']} user={user}><LibrarianHomeResolver /></RequireRole>} />
+            <Route path="librarian/:libraryId/inventory" element={<RequireRole roles={['librarian', 'admin']} user={user}><InventoryRoute /></RequireRole>} />
+            <Route path="librarian/:libraryId/requests" element={<RequireRole roles={['librarian', 'admin']} user={user}><RequestsRoute /></RequireRole>} />
+          </Route>
 
-        {/* Admin panel */}
-        <Route
-          path="/admin"
-          element={<RequireRole roles={['admin']} user={user}><AdminLayout /></RequireRole>}
-        >
-          <Route index element={<Navigate to="/admin/librarian-applications" replace />} />
-          <Route path="librarian-applications" element={<AdminLibrarianApplications />} />
-          <Route path="requests" element={<AdminRequests />} />
-          <Route path="books" element={<BooksAdmin />} />
-          <Route path="inventory" element={<InventoryAdmin />} />
-          <Route path="users" element={<UsersAdmin />} />
-          <Route path="libraries" element={<LibrariesAdmin />} />
-          <Route path="requests" element={<RequestsAdmin />} />
-        </Route>
+          {/* Admin panel */}
+          <Route
+            path="/admin"
+            element={<RequireRole roles={['admin']} user={user}><AdminLayout /></RequireRole>}
+          >
+            <Route index element={<Navigate to="/admin/librarian-applications" replace />} />
+            <Route path="librarian-applications" element={<AdminLibrarianApplications />} />
+            <Route path="requests" element={<AdminRequests />} />
+            <Route path="books" element={<BooksAdmin />} />
+            <Route path="inventory" element={<InventoryAdmin />} />
+            <Route path="users" element={<UsersAdmin />} />
+            <Route path="libraries" element={<LibrariesAdmin />} />
+            <Route path="requests" element={<RequestsAdmin />} />
+          </Route>
 
-        <Route path="/cart" element={<Cart />} />
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    </Router>
+          <Route path="/cart" element={<Cart />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </Router>
+    </ThemeProvider>
   );
 }
 

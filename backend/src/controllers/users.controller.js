@@ -53,7 +53,7 @@ exports.getMe = async (req, res, next) => {
 // PUT /api/user/me
 exports.updateMe = async (req, res, next) => {
     try {
-        const { firstName, lastName, gender, dob, city } = req.body;
+        const { firstName, lastName, gender, dob, city, theme } = req.body;
         const user = await User.findById(req.user.id);
         if (!user) return res.status(404).json({ message: 'User not found' });
 
@@ -62,6 +62,7 @@ exports.updateMe = async (req, res, next) => {
         if (gender) user.gender = gender;
         if (dob) user.dob = new Date(dob);
         if (city) user.city = city;
+        if (theme) user.theme = String(theme);
 
         await user.save();
         const { password, ...safe } = user.toObject();

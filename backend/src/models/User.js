@@ -24,7 +24,8 @@ const userSchema = new Schema({
         type: String,
         enum: ['none', 'pending', 'approved', 'rejected'],
         default: 'none'
-    }
+    },
+    theme: { type: String, default: 'scholarly' }
 }, { timestamps: true });
 
 // Hash the password before saving

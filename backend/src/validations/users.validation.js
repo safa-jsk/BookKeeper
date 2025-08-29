@@ -17,6 +17,7 @@ exports.updateMe = Joi.object({
     gender: Joi.string().valid('Male', 'Female', 'Other').optional(),
     dob: Joi.date().iso().optional(),
     city: Joi.string().trim().optional(),
+    theme: Joi.string().trim().optional(),
 });
 
 exports.changePassword = Joi.object({
