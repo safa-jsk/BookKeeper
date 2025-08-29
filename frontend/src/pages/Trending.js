@@ -20,7 +20,15 @@ export default function Trending() {
             setLoading(true);
             try {
                 const { data } = await books.list();
-                setAllBooks(Array.isArray(data) ? data : []);
+                // Handle new pagination format
+                if (data.books && Array.isArray(data.books)) {
+                    setAllBooks(data.books);
+                } else if (Array.isArray(data)) {
+                    // Fallback for old format
+                    setAllBooks(data);
+                } else {
+                    setAllBooks([]);
+                }
             } finally {
                 setLoading(false);
             }

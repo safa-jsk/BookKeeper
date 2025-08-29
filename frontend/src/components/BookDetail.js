@@ -151,7 +151,7 @@ function BookDetail() {
 
           <Typography variant="h5" sx={{ mb: 2 }}>Description</Typography>
           <Typography variant="body1" sx={{ whiteSpace: 'pre-line' }}>
-            {book.description || 'No description available.'}
+            {book.summary || 'No description available.'}
           </Typography>
 
           <Divider sx={{ my: 3 }} />
@@ -251,7 +251,7 @@ function BookDetail() {
           >
             <CardMedia
               component="img"
-              image={book.image ? `/${book.image}` : '/default-book-cover.jpg'}
+              image={book.image || '/images/books/harry-potter-and-the-philosophers-stone.jpg'}
               alt={book.title}
               sx={{
                 objectFit: 'cover',

@@ -114,7 +114,15 @@ export default function AISearch() {
             setLoading(true);
             try {
                 const { data } = await booksApi.list();
-                setList(Array.isArray(data) ? data : []);
+                // Handle new pagination format
+                if (data.books && Array.isArray(data.books)) {
+                    setList(data.books);
+                } else if (Array.isArray(data)) {
+                    // Fallback for old format
+                    setList(data);
+                } else {
+                    setList([]);
+                }
             } finally { setLoading(false); }
         };
         load();

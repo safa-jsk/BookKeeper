@@ -29,12 +29,15 @@ export default function BookCard({ book, onRemove, onReview, onAddToFinished, on
             <CardMedia
                 component="img"
                 height="170"
-                image={book.image ? `/${book.image}` : '/default-book-cover.jpg'}
+                image={book.image || '/images/books/harry-potter-and-the-philosophers-stone.jpg'}
                 alt={book.title}
                 sx={{
                     objectFit: 'cover',
                     borderRadius: '12px 12px 0 0',
                     background: theme.palette.background.paper
+                }}
+                onError={(e) => {
+                    e.target.src = '/images/books/harry-potter-and-the-philosophers-stone.jpg';
                 }}
             />
             <CardContent sx={{ flexGrow: 1, p: 2 }}>
