@@ -14,7 +14,8 @@ const bookSchema = new Schema({
   wantToReadBy: [{ type: Schema.Types.ObjectId, ref: 'User' }],
   finishedBy: [{ type: Schema.Types.ObjectId, ref: 'User' }],
   favoritedBy: [{ type: Schema.Types.ObjectId, ref: 'User' }],
-  currentlyReadingBy: [{ type: Schema.Types.ObjectId, ref: 'User' }]
+  currentlyReadingBy: [{ type: Schema.Types.ObjectId, ref: 'User' }],
+  summary: { type: String, required: false, trim: true }
 }, { timestamps: true });
 
 module.exports = mongoose.model('Book', bookSchema);

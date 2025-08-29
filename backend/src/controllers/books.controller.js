@@ -7,12 +7,15 @@ const toId = (id) => new mongoose.Types.ObjectId(id);
 // GET /api/books/search
 exports.search = async (req, res, next) => {
     try {
-        const { query, filter } = req.query;
+        const { query, filter, page = 1, limit = 25 } = req.query;
         const q = (query || '').trim();
+        const pageNum = parseInt(page) || 1;
+        const limitNum = parseInt(limit) || 25;
+        const skip = (pageNum - 1) * limitNum;
 
         let criteria = {};
         if (!q) {
-            // no criteria -> return all (consider adding pagination later)
+            // no criteria -> return all with pagination
             criteria = {};
         } else if (!filter || filter === 'none') {
             criteria = {
@@ -33,18 +36,59 @@ exports.search = async (req, res, next) => {
             criteria = { rating: { $gte: minRating } };
         }
 
-        const books = await Book.find(criteria).lean();
-        res.json(books);
+        // Get total count for pagination
+        const total = await Book.countDocuments(criteria);
+        const totalPages = Math.ceil(total / limitNum);
+
+        const books = await Book.find(criteria)
+            .skip(skip)
+            .limit(limitNum)
+            .lean();
+
+        res.json({
+            books,
+            pagination: {
+                currentPage: pageNum,
+                totalPages,
+                totalBooks: total,
+                booksPerPage: limitNum,
+                hasNextPage: pageNum < totalPages,
+                hasPrevPage: pageNum > 1
+            }
+        });
     } catch (err) {
         next(err);
     }
 };
 
 // GET /api/books
-exports.list = async (_req, res, next) => {
+exports.list = async (req, res, next) => {
     try {
-        const books = await Book.find().lean();
-        res.json(books);
+        const { page = 1, limit = 25 } = req.query;
+        const pageNum = parseInt(page) || 1;
+        const limitNum = parseInt(limit) || 25;
+        const skip = (pageNum - 1) * limitNum;
+
+        // Get total count for pagination
+        const total = await Book.countDocuments();
+        const totalPages = Math.ceil(total / limitNum);
+
+        const books = await Book.find()
+            .skip(skip)
+            .limit(limitNum)
+            .lean();
+
+        res.json({
+            books,
+            pagination: {
+                currentPage: pageNum,
+                totalPages,
+                totalBooks: total,
+                booksPerPage: limitNum,
+                hasNextPage: pageNum < totalPages,
+                hasPrevPage: pageNum > 1
+            }
+        });
     } catch (err) {
         next(err);
     }

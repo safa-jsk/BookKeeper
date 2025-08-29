@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useTheme } from '@mui/material/styles';
 import axios from 'axios';
 import {
-  Typography, Button, Grid, Box, FormControl, InputLabel, Select, MenuItem, Fade
+  Typography, Button, Grid, Box, FormControl, InputLabel, Select, MenuItem, Fade, Pagination
 } from '@mui/material';
 import BookCard from '../components/BookCard';
 
@@ -14,16 +14,47 @@ function BookList() {
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('none');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pagination, setPagination] = useState({
+    currentPage: 1,
+    totalPages: 1,
+    totalBooks: 0,
+    booksPerPage: 25,
+    hasNextPage: false,
+    hasPrevPage: false
+  });
 
-  const fetchBooks = async (query = '', filter = 'none') => {
+  const fetchBooks = async (query = '', filter = 'none', page = 1) => {
     setLoading(true);
     try {
-      const params = { query };
-      if (filter && filter !== 'none') params.filter = filter;
+      const params = { query, filter, page, limit: 25 };
       const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/books/search`, { params });
-      setBooks(response.data);
+
+      if (response.data.books && response.data.pagination) {
+        setBooks(response.data.books);
+        setPagination(response.data.pagination);
+      } else {
+        // Fallback for old API format
+        setBooks(response.data);
+        setPagination({
+          currentPage: 1,
+          totalPages: 1,
+          totalBooks: response.data.length,
+          booksPerPage: 25,
+          hasNextPage: false,
+          hasPrevPage: false
+        });
+      }
     } catch {
       setBooks([]);
+      setPagination({
+        currentPage: 1,
+        totalPages: 1,
+        totalBooks: 0,
+        booksPerPage: 25,
+        hasNextPage: false,
+        hasPrevPage: false
+      });
     } finally {
       setLoading(false);
     }
@@ -39,16 +70,31 @@ function BookList() {
       // If rating filter is selected but query is empty, show nothing until user provides a value
       if (filter === 'rating' && !searchQuery.trim()) {
         setBooks([]);
+        setPagination({
+          currentPage: 1,
+          totalPages: 1,
+          totalBooks: 0,
+          booksPerPage: 25,
+          hasNextPage: false,
+          hasPrevPage: false
+        });
         return;
       }
-      fetchBooks(searchQuery, filter);
+      setCurrentPage(1); // Reset to first page when search changes
+      fetchBooks(searchQuery, filter, 1);
     }, 300);
     return () => clearTimeout(handle);
   }, [searchQuery, filter]);
 
+  const handlePageChange = (event, value) => {
+    setCurrentPage(value);
+    fetchBooks(searchQuery, filter, value);
+  };
+
   const handleSearchSubmit = (e) => {
     e.preventDefault();
-    fetchBooks(searchQuery, filter);
+    setCurrentPage(1);
+    fetchBooks(searchQuery, filter, 1);
   };
 
   return (
@@ -117,6 +163,15 @@ function BookList() {
         </Button>
       </Box>
 
+      {/* Results Info */}
+      {!loading && books.length > 0 && (
+        <Box sx={{ textAlign: 'center', mb: 3 }}>
+          <Typography variant="body2" color="text.secondary">
+            Showing {((currentPage - 1) * 25) + 1} - {Math.min(currentPage * 25, pagination.totalBooks)} of {pagination.totalBooks} books
+          </Typography>
+        </Box>
+      )}
+
       <Grid
         container
         spacing={3}
@@ -137,6 +192,21 @@ function BookList() {
           </Fade>
         ))}
       </Grid>
+
+      {/* Pagination */}
+      {!loading && pagination.totalPages > 1 && (
+        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+          <Pagination
+            count={pagination.totalPages}
+            page={currentPage}
+            onChange={handlePageChange}
+            color="primary"
+            size="large"
+            showFirstButton
+            showLastButton
+          />
+        </Box>
+      )}
     </Box>
   );
 }
