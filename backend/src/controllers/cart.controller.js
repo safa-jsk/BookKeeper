@@ -18,7 +18,10 @@ exports.addOrUpdateItem = async (req, res, next) => {
         const qty = Math.max(1, Number(quantity));
 
         const cart = await getOrCreateCart(req.user.id);
-        const idx = cart.items.findIndex(it => it.book.toString() === bookId);
+        const idx = cart.items.findIndex(it => {
+            const currentId = (it.book && it.book._id) ? it.book._id.toString() : it.book.toString();
+            return currentId === bookId;
+        });
 
         if (idx >= 0) {
             cart.items[idx].quantity = qty;
@@ -37,7 +40,10 @@ exports.removeItem = async (req, res, next) => {
     try {
         const { bookId } = req.params;
         const cart = await getOrCreateCart(req.user.id);
-        cart.items = cart.items.filter(it => it.book.toString() !== bookId);
+        cart.items = cart.items.filter(it => {
+            const currentId = (it.book && it.book._id) ? it.book._id.toString() : it.book.toString();
+            return currentId !== bookId;
+        });
         await cart.save();
 
         const populated = await Cart.findById(cart._id).populate('items.book', BOOK_PROJECTION);

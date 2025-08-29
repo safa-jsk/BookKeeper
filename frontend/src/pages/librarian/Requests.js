@@ -1,18 +1,29 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { Box, Card, CardHeader, CardContent, Stack, Typography, Button, Snackbar, Alert, Dialog, DialogTitle, DialogContent, DialogActions, TextField } from '@mui/material';
+import { Box, Card, CardHeader, CardContent, Stack, Typography, Button, Snackbar, Alert, Dialog, DialogTitle, DialogContent, DialogActions, TextField, Tabs, Tab, Chip, IconButton, Tooltip, Divider } from '@mui/material';
+import RefreshIcon from '@mui/icons-material/Refresh';
 import { requests } from '../../services/api';
 
+const STATUS = ['pending', 'approved', 'rejected', 'delayed'];
+
 export default function LibrarianRequests({ libraryId }) {
+    const [tab, setTab] = useState(0);
     const [rows, setRows] = useState([]);
     const [snack, setSnack] = useState({ open: false, severity: 'success', message: '' });
     const [delayOpen, setDelayOpen] = useState(false);
     const [delayDays, setDelayDays] = useState(3);
     const [delayTarget, setDelayTarget] = useState(null);
+    const [loading, setLoading] = useState(false);
 
     const load = useCallback(async () => {
-        const { data } = await requests.listForLibrary(libraryId, 'pending');
-        setRows(data);
-    }, [libraryId]);
+        if (!libraryId) return;
+        setLoading(true);
+        try {
+            const { data } = await requests.listForLibrary(libraryId, STATUS[tab]);
+            setRows(data || []);
+        } finally {
+            setLoading(false);
+        }
+    }, [libraryId, tab]);
 
     useEffect(() => {
         if (libraryId) load();
@@ -58,15 +69,33 @@ export default function LibrarianRequests({ libraryId }) {
     return (
         <Box p={3}>
             <Card>
-                <CardHeader title="Requested Books" subheader="Approve or reject user requests" />
+                <CardHeader
+                    title="Requested Books"
+                    subheader="Review requests by status; act on pending ones"
+                    action={
+                        <Tooltip title="Refresh">
+                            <span>
+                                <IconButton onClick={load} disabled={loading}>
+                                    <RefreshIcon />
+                                </IconButton>
+                            </span>
+                        </Tooltip>
+                    }
+                />
                 <CardContent>
+                    <Tabs value={tab} onChange={(_, v) => setTab(v)} sx={{ mb: 2 }}>
+                        <Tab label="Pending" />
+                        <Tab label="Approved" />
+                        <Tab label="Rejected" />
+                        <Tab label="Delayed" />
+                    </Tabs>
                     <Stack spacing={2}>
                         {rows.length === 0 ? (
-                            <Typography color="text.secondary">No pending requests.</Typography>
+                            <Typography color="text.secondary">{loading ? 'Loading…' : `No ${STATUS[tab]} requests.`}</Typography>
                         ) : rows.map(req => (
                             <Card key={req._id} variant="outlined">
                                 <CardContent>
-                                    <Stack direction="row" justifyContent="space-between" alignItems="center">
+                                    <Stack direction={{ xs: 'column', md: 'row' }} justifyContent="space-between" alignItems={{ xs: 'flex-start', md: 'center' }} gap={1.5}>
                                         <Box>
                                             <Typography variant="subtitle1">
                                                 {req.user?.firstName} {req.user?.lastName} — {req.user?.email}
@@ -78,11 +107,34 @@ export default function LibrarianRequests({ libraryId }) {
                                                     </Typography>
                                                 ))}
                                             </Stack>
+                                            <Divider sx={{ my: 1 }} />
+                                            <Typography variant="caption" color="text.secondary">
+                                                Requested: {new Date(req.createdAt).toLocaleString()}
+                                            </Typography>
+                                            {req.status === 'delayed' && req.expectedAt && (
+                                                <Typography variant="caption" color="warning.main" sx={{ display: 'block' }}>
+                                                    Expected by: {new Date(req.expectedAt).toLocaleDateString()}
+                                                </Typography>
+                                            )}
+                                            {req.note && (
+                                                <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
+                                                    Note: {req.note}
+                                                </Typography>
+                                            )}
                                         </Box>
-                                        <Stack direction="row" spacing={1}>
-                                            <Button onClick={() => approve(req._id)} variant="contained">Approve</Button>
-                                            <Button onClick={() => reject(req._id)} color="error" variant="outlined">Reject</Button>
-                                            <Button onClick={() => openDelay(req._id)} color="warning" variant="outlined">Delay</Button>
+                                        <Stack alignItems={{ xs: 'flex-start', md: 'flex-end' }} spacing={1}>
+                                            <Chip
+                                                size="small"
+                                                label={req.status?.toUpperCase()}
+                                                color={req.status === 'pending' ? 'warning' : req.status === 'approved' ? 'success' : req.status === 'rejected' ? 'default' : req.status === 'delayed' ? 'info' : 'default'}
+                                            />
+                                            {tab === 0 && (
+                                                <Stack direction="row" spacing={1}>
+                                                    <Button onClick={() => approve(req._id)} variant="contained">Approve</Button>
+                                                    <Button onClick={() => reject(req._id)} color="error" variant="outlined">Reject</Button>
+                                                    <Button onClick={() => openDelay(req._id)} color="warning" variant="outlined">Delay</Button>
+                                                </Stack>
+                                            )}
                                         </Stack>
                                     </Stack>
                                 </CardContent>
