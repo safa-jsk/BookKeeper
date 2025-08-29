@@ -6,6 +6,7 @@ import BookList from './components/BookList';
 import BookDetail from './components/BookDetail';
 import Hakla from './pages/Hakla';
 import Trending from './pages/Trending';
+import AISearch from './pages/AISearch';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import AccountSettings from './pages/AccountSettings';
@@ -90,6 +91,7 @@ function App() {
         <Route path="/browse" element={<BookList />} />
         <Route path="/hakla" element={<Hakla />} />
         <Route path="/trending" element={<Trending />} />
+        <Route path="/ai-search" element={<AISearch />} />
         <Route path="/books/:id" element={<BookDetail />} />
         <Route path="/login" element={<Login onLogin={handleLogin} />} />
         <Route path="/register" element={<Register onRegister={handleLogin} />} />

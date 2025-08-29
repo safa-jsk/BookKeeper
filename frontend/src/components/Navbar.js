@@ -68,6 +68,7 @@ export default function Navbar({ user, onLogout }) {
             <Button color="inherit" component={Link} to="/browse" sx={{ textTransform: 'none' }}>Browse Books</Button>
             <Button color="inherit" component={Link} to="/trending" sx={{ textTransform: 'none' }}>Trending</Button>
             <Button color="inherit" component={Link} to="/map" sx={{ textTransform: 'none' }}>Map</Button>
+            <Button color="inherit" component={Link} to="/ai-search" sx={{ textTransform: 'none' }}>AI Search</Button>
           </Box>
 
           {/* User dropdown */}

@@ -33,6 +33,19 @@ function BookList() {
     fetchBooks();
   }, []);
 
+  // Real-time search with debounce on query/filter
+  useEffect(() => {
+    const handle = setTimeout(() => {
+      // If rating filter is selected but query is empty, show nothing until user provides a value
+      if (filter === 'rating' && !searchQuery.trim()) {
+        setBooks([]);
+        return;
+      }
+      fetchBooks(searchQuery, filter);
+    }, 300);
+    return () => clearTimeout(handle);
+  }, [searchQuery, filter]);
+
   const handleSearchSubmit = (e) => {
     e.preventDefault();
     fetchBooks(searchQuery, filter);
