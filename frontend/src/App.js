@@ -54,6 +54,7 @@ function App() {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     setUser(null);
+    try { window.location.assign('/'); } catch { }
   };
 
   const handleLogin = (userObj) => {
@@ -62,7 +63,32 @@ function App() {
     if (userObj.role === 'librarian') {
       localStorage.setItem('libraryId', userObj.libraryId);
     }
+    // Navigate to role home (safe outside Router context)
+    try { window.location.assign(userObj.role === 'admin' ? '/admin' : '/dashboard'); } catch { }
   };
+
+
+  // Logout when the last open tab/window of this site is closed
+  useEffect(() => {
+    try {
+      const current = Number(localStorage.getItem('openTabs') || '0');
+      localStorage.setItem('openTabs', String(current + 1));
+    } catch { }
+
+    const onBeforeUnload = () => {
+      try {
+        const current = Number(localStorage.getItem('openTabs') || '0');
+        const remaining = Math.max(0, current - 1);
+        localStorage.setItem('openTabs', String(remaining));
+        if (remaining === 0) {
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
+        }
+      } catch { }
+    };
+    window.addEventListener('beforeunload', onBeforeUnload);
+    return () => window.removeEventListener('beforeunload', onBeforeUnload);
+  }, []);
 
   // Route wrappers
   const InventoryRoute = () => {
@@ -87,7 +113,7 @@ function App() {
     <Router>
       <Navbar user={user} onLogout={handleLogout} />
       <Routes>
-        <Route path="/" element={<Home onLogin={handleLogin} />} />
+        <Route path="/" element={<Home onLogin={handleLogin} user={user} />} />
         <Route path="/browse" element={<BookList />} />
         <Route path="/hakla" element={<Hakla />} />
         <Route path="/trending" element={<Trending />} />

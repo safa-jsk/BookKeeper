@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useTheme } from '@mui/material/styles';
 import axios from 'axios';
-import { Box, Typography, Paper, LinearProgress, Grid, Chip, Stack } from '@mui/material';
+import { Box, Typography, Paper, Grid, Chip, Stack } from '@mui/material';
 import { listMyRequests } from '../../services/api';
 
 function DashboardHome({ user }) {
@@ -21,34 +21,11 @@ function DashboardHome({ user }) {
 
     if (!data) return <Typography>Loading dashboard...</Typography>;
 
-    const totalBooks =
-        (data.wantToRead?.length || 0) +
-        (data.currentlyReading?.length || 0) +
-        (data.finished?.length || 0);
-    const progress = totalBooks ? (data.finished.length / totalBooks) * 100 : 0;
-
     return (
         <Box>
             <Typography variant="h4" sx={{ mb: 3 }}>
                 Welcome, {user?.firstName || "Reader"}!
             </Typography>
-
-            {/* Currently Reading Progress */}
-            <Paper elevation={2} sx={{ mb: 4, p: 3 }}>
-                <Typography variant="h6" gutterBottom>📚 Currently Reading</Typography>
-                {data.currentlyReading.length === 0 ? (
-                    <Typography>No books currently being read.</Typography>
-                ) : (
-                    data.currentlyReading.map((book) => (
-                        <Box key={book._id} sx={{ mb: 2 }}>
-                            <Typography fontWeight={600}>{book.title}</Typography>
-                            <Typography variant="body2" sx={{ mb: 1 }}>by {book.author}</Typography>
-                            <LinearProgress variant="determinate" value={progress || 0} sx={{ height: 10, borderRadius: 5 }} />
-                            <Typography variant="caption">{progress || 0}% complete</Typography>
-                        </Box>
-                    ))
-                )}
-            </Paper>
 
             <Grid container spacing={3}>
                 {/* Books Read This Year */}
