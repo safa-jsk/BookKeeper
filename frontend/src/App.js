@@ -26,10 +26,12 @@ import LibrarianHomeResolver from './pages/librarian/HomeResolver';
 
 import AdminLayout from './pages/admin/Layout';
 import AdminLibrarianApplications from './pages/admin/LibrarianApplications';
+import AdminRequests from './pages/admin/Requests';
 import BooksAdmin from './pages/admin/Books';
 import InventoryAdmin from './pages/admin/Inventory';
 import UsersAdmin from './pages/admin/Users';
 import LibrariesAdmin from './pages/admin/Libraries';
+import RequestsAdmin from './pages/admin/Requests';
 
 import './styles/styles.css';
 
@@ -144,10 +146,12 @@ function App() {
         >
           <Route index element={<Navigate to="/admin/librarian-applications" replace />} />
           <Route path="librarian-applications" element={<AdminLibrarianApplications />} />
+          <Route path="requests" element={<AdminRequests />} />
           <Route path="books" element={<BooksAdmin />} />
           <Route path="inventory" element={<InventoryAdmin />} />
           <Route path="users" element={<UsersAdmin />} />
           <Route path="libraries" element={<LibrariesAdmin />} />
+          <Route path="requests" element={<RequestsAdmin />} />
         </Route>
 
         <Route path="/cart" element={<Cart />} />

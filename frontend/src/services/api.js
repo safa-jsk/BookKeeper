@@ -123,6 +123,13 @@ export const admin = {
     createInventory: (payload) => api.post('/admin/inventories', payload),
     updateInventory: (id, payload) => api.put(`/admin/inventories/${id}`, payload),
     deleteInventory: (id) => api.delete(`/admin/inventories/${id}`),
+
+    // Requests (admin)
+    listRequests: (status) => api.get('/admin/requests', { params: status ? { status } : {} }),
+    approveRequest: (id) => api.patch(`/admin/requests/${id}/approve`),
+    rejectRequest: (id, note = '') => api.patch(`/admin/requests/${id}/reject`, { note }),
+    delayRequest: (id, days, note = '') => api.patch(`/admin/requests/${id}/delay`, { days, note }),
+    deleteRequest: (id) => api.delete(`/admin/requests/${id}`),
 };
 
 // convenience re-exports for legacy imports

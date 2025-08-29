@@ -13,6 +13,7 @@ export default function AdminLayout() {
         { label: 'Book Inventory', to: '/admin/inventory' },
         { label: 'Users', to: '/admin/users' },
         { label: 'Libraries', to: '/admin/libraries' },
+        { label: 'Requests', to: '/admin/requests' },
     ];
 
     return (
