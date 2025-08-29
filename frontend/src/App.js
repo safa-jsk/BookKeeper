@@ -22,7 +22,7 @@ import LibrarianRequests from './pages/librarian/Requests';
 import LibrarianHomeResolver from './pages/librarian/HomeResolver';
 
 import AdminLayout from './pages/admin/Layout';
-import AdminLibrarianQueue from './pages/AdminLibrarianQueue';
+import AdminLibrarianApplications from './pages/admin/LibrarianApplications';
 import BooksAdmin from './pages/admin/Books';
 import InventoryAdmin from './pages/admin/Inventory';
 import UsersAdmin from './pages/admin/Users';
@@ -111,7 +111,7 @@ function App() {
           element={<RequireRole roles={['admin']} user={user}><AdminLayout /></RequireRole>}
         >
           <Route index element={<Navigate to="/admin/librarian-applications" replace />} />
-          <Route path="librarian-applications" element={<AdminLibrarianQueue />} />
+          <Route path="librarian-applications" element={<AdminLibrarianApplications />} />
           <Route path="books" element={<BooksAdmin />} />
           <Route path="inventory" element={<InventoryAdmin />} />
           <Route path="users" element={<UsersAdmin />} />

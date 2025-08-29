@@ -7,11 +7,11 @@ import CheckIcon from '@mui/icons-material/Check';
 import CloseIcon from '@mui/icons-material/Close';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import SearchIcon from '@mui/icons-material/Search';
-import { admin } from '../services/api';
+import { admin } from '../../services/api';
 
 const STATUS = ['pending', 'approved', 'rejected'];
 
-export default function AdminLibrarianQueue() {
+export default function AdminLibrarianApplications() {
     const [tab, setTab] = useState(0);
     const [rows, setRows] = useState([]);
     const [q, setQ] = useState('');
