@@ -22,6 +22,6 @@ const librarianApplicationSchema = new Schema({
 }, { timestamps: true });
 
 librarianApplicationSchema.index({ applicant: 1, status: 1 });
-librarianApplicationSchema.index({ ownerPhone: 1 }, { unique: true });
+librarianApplicationSchema.index({ unique: true });
 
 module.exports = mongoose.model('LibrarianApplication', librarianApplicationSchema);
