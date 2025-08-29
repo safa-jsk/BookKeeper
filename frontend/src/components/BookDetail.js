@@ -3,7 +3,7 @@ import { useTheme } from '@mui/material/styles';
 import { useParams, Link } from 'react-router-dom';
 import axios from 'axios';
 import {
-  Grid, CardMedia, Typography, Button, Box, TextField, Divider, Paper, Stack, Snackbar, Alert
+  Grid, CardMedia, Typography, Button, Box, TextField, Divider, Paper, Stack, Snackbar, Alert, Dialog, DialogTitle, DialogContent, DialogActions, Link as MuiLink
 } from '@mui/material';
 import AddShoppingCartIcon from '@mui/icons-material/AddShoppingCart';
 import { addCartItem } from '../services/api';
@@ -23,6 +23,7 @@ function BookDetail() {
   const [newReview, setNewReview] = useState({ user: '', rating: 5, comment: '' });
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
   const [categories, setCategories] = useState({});
+  const [linksOpen, setLinksOpen] = useState(false);
 
   // Book Data
   useEffect(() => {
@@ -94,6 +95,25 @@ function BookDetail() {
     }
   };
 
+  // Build provider links using ISBN when available, otherwise title/author
+  const buildProviderLinks = () => {
+    const encodedTitle = encodeURIComponent(book.title || '');
+    const encodedAuthor = encodeURIComponent(book.author || '');
+    const query = encodeURIComponent(`${encodedTitle || ''} ${encodedAuthor || ''}`.trim());
+    const isbn = (book.isbn || '').trim();
+    return {
+      googleBooks: isbn
+        ? `https://www.google.com/search?tbm=bks&q=isbn:${encodeURIComponent(isbn)}`
+        : `https://www.google.com/search?tbm=bks&q=${query}`,
+      openLibrary: isbn
+        ? `https://openlibrary.org/isbn/${encodeURIComponent(isbn)}`
+        : `https://openlibrary.org/search?q=${query}`,
+      amazon: isbn
+        ? `https://www.amazon.com/s?k=${encodeURIComponent(isbn)}`
+        : `https://www.amazon.com/s?k=${query}`,
+      googleSearchRead: `https://www.google.com/search?q=${query}+read+online`,
+    };
+  };
 
   if (loading) return <div>Loading...</div>;
   if (!book) return <div>Book not found.</div>;
@@ -272,6 +292,14 @@ function BookDetail() {
                   </Button>
                 );
               })}
+              <Button
+                variant="outlined"
+                color="secondary"
+                onClick={() => setLinksOpen(true)}
+                sx={{ textTransform: 'none', fontWeight: 600 }}
+              >
+                Find Online (Read/Buy)
+              </Button>
             </Stack>
           </Box>
 
@@ -288,6 +316,36 @@ function BookDetail() {
           </Snackbar>
         </Grid>
       </Grid>
+
+      {/* Provider Links Dialog */}
+      <Dialog open={linksOpen} onClose={() => setLinksOpen(false)} fullWidth maxWidth="sm">
+        <DialogTitle>Find “{book.title}” Online</DialogTitle>
+        <DialogContent dividers>
+          {(() => {
+            const links = buildProviderLinks();
+            return (
+              <Stack spacing={1}>
+                <Typography>Choose a source:</Typography>
+                <MuiLink href={links.googleBooks} target="_blank" rel="noopener" underline="hover">
+                  Google Books (previews and stores)
+                </MuiLink>
+                <MuiLink href={links.openLibrary} target="_blank" rel="noopener" underline="hover">
+                  Open Library (borrow/read options)
+                </MuiLink>
+                <MuiLink href={links.amazon} target="_blank" rel="noopener" underline="hover">
+                  Amazon (buy)
+                </MuiLink>
+                <MuiLink href={links.googleSearchRead} target="_blank" rel="noopener" underline="hover">
+                  Google Search: read online
+                </MuiLink>
+              </Stack>
+            );
+          })()}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setLinksOpen(false)}>Close</Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }
