@@ -10,6 +10,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import AccountSettings from './pages/AccountSettings';
 import Cart from './pages/Cart';
+import Map from './pages/Map';
 
 import DashboardLayout from './pages/dashboard/Layout';
 import DashboardHome from './pages/dashboard/Home';
@@ -92,6 +93,7 @@ function App() {
         <Route path="/books/:id" element={<BookDetail />} />
         <Route path="/login" element={<Login onLogin={handleLogin} />} />
         <Route path="/register" element={<Register onRegister={handleLogin} />} />
+        <Route path="/map" element={<Map />} />
 
         {/* Reader/Librarian dashboard */}
         <Route path="/dashboard/*" element={<DashboardLayout user={user} />}>

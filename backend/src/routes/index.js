@@ -27,4 +27,7 @@ router.use('/cart', require('./cart.routes'));
 // /api/requests/*
 router.use('/requests', require('./request.routes'));
 
+// /api/libraries/* (public locations for map)
+router.use('/libraries', require('./libraries.routes'));
+
 module.exports = router;

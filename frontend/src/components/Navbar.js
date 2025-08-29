@@ -67,6 +67,7 @@ export default function Navbar({ user, onLogout }) {
           <Box sx={{ flexGrow: 1, display: 'flex', gap: 2 }}>
             <Button color="inherit" component={Link} to="/browse" sx={{ textTransform: 'none' }}>Browse Books</Button>
             <Button color="inherit" component={Link} to="/trending" sx={{ textTransform: 'none' }}>Trending</Button>
+            <Button color="inherit" component={Link} to="/map" sx={{ textTransform: 'none' }}>Map</Button>
           </Box>
 
           {/* User dropdown */}
