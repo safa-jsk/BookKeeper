@@ -56,7 +56,10 @@ function App() {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     setUser(null);
-    try { window.location.assign('/'); } catch { }
+    try {
+      sessionStorage.setItem('navigating', '1');
+      window.location.assign('/');
+    } catch { }
   };
 
   const handleLogin = (userObj) => {
@@ -66,19 +69,29 @@ function App() {
       localStorage.setItem('libraryId', userObj.libraryId);
     }
     // Navigate to role home (safe outside Router context)
-    try { window.location.assign(userObj.role === 'admin' ? '/admin' : '/dashboard'); } catch { }
+    try {
+      sessionStorage.setItem('navigating', '1');
+      window.location.assign(userObj.role === 'admin' ? '/admin' : '/dashboard');
+    } catch { }
   };
 
 
-  // Logout when the last open tab/window of this site is closed
+  // Track open tabs and clear token only when the last real window closes (not SPA navigations)
   useEffect(() => {
     try {
-      const current = Number(localStorage.getItem('openTabs') || '0');
-      localStorage.setItem('openTabs', String(current + 1));
+      // Clear navigating flag on load and mark this tab initialized
+      sessionStorage.removeItem('navigating');
+      if (!sessionStorage.getItem('tabInitialized')) {
+        const current = Number(localStorage.getItem('openTabs') || '0');
+        localStorage.setItem('openTabs', String(current + 1));
+        sessionStorage.setItem('tabInitialized', '1');
+      }
     } catch { }
 
     const onBeforeUnload = () => {
       try {
+        // Skip clearing on in-app navigations
+        if (sessionStorage.getItem('navigating') === '1') return;
         const current = Number(localStorage.getItem('openTabs') || '0');
         const remaining = Math.max(0, current - 1);
         localStorage.setItem('openTabs', String(remaining));
