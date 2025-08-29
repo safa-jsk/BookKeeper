@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const User = require('../models/User');
 const Book = require('../models/Book');
+const Inventory = require('../models/Inventory');
 
 const BOOK_PROJECTION = 'title author genre image rating year'; // tweak as you like
 
@@ -16,9 +17,25 @@ exports.getOverview = async (req, res, next) => {
 
         if (!user) return res.status(404).json({ error: 'User not found' });
 
+        // Compute global availability for Want To Read across all libraries
+        const wantIds = (user.wantToRead || []).map(b => b._id);
+        let availabilityMap = {};
+        if (wantIds.length > 0) {
+            const rows = await Inventory.aggregate([
+                { $match: { book: { $in: wantIds } } },
+                { $group: { _id: '$book', total: { $sum: '$stock' } } }
+            ]);
+            availabilityMap = Object.fromEntries(rows.map(r => [String(r._id), (r.total || 0) > 0]));
+        }
+
+        const wantWithAvailability = (user.wantToRead || []).map(b => ({
+            ...b,
+            available: !!availabilityMap[String(b._id)]
+        }));
+
         res.json({
             currentlyReading: user.currentlyReading || [],
-            wantToRead: user.wantToRead || [],
+            wantToRead: wantWithAvailability,
             finished: user.finished || [],
             favorites: user.favorites || [],
             booksReadThisYear: (user.finished || []).length // (optionally filter by year if you store dates)
