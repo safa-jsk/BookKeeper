@@ -4,6 +4,7 @@ import Navbar from './components/Navbar';
 import Home from './pages/Home';
 import BookList from './components/BookList';
 import BookDetail from './components/BookDetail';
+import Hakla from './pages/Hakla';
 import Trending from './pages/Trending';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -86,6 +87,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Home onLogin={handleLogin} />} />
         <Route path="/browse" element={<BookList />} />
+        <Route path="/hakla" element={<Hakla />} />
         <Route path="/trending" element={<Trending />} />
         <Route path="/books/:id" element={<BookDetail />} />
         <Route path="/login" element={<Login onLogin={handleLogin} />} />
