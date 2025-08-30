@@ -14,7 +14,6 @@ import {
 import {
     AutoAwesome,
     TrendingUp,
-    BookmarkBorder,
     AddToQueue
 } from '@mui/icons-material';
 import { useTheme } from '@mui/material/styles';

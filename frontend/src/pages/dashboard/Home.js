@@ -9,7 +9,7 @@ function DashboardHome({ user }) {
     const theme = useTheme();
     const [data, setData] = useState(null);
     const [myRequests, setMyRequests] = useState([]);
-    const [loading, setLoading] = useState(false);
+    const [setLoading] = useState(false);
 
     useEffect(() => {
         const token = localStorage.getItem('token');

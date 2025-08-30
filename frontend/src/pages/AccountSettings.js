@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import {
     Box, Grid, Card, CardContent, CardHeader, TextField, Button, MenuItem,
-    Typography, Snackbar, Alert, Avatar, Divider, Stack, Skeleton, Chip, IconButton
+    Typography, Snackbar, Alert, Avatar, Divider, Stack, Skeleton, Chip
 } from '@mui/material';
 import { useTheme, alpha } from '@mui/material/styles';
 import axios from 'axios';
@@ -15,6 +15,7 @@ import PhotoCamera from '@mui/icons-material/PhotoCamera';
 import SecurityIcon from '@mui/icons-material/Security';
 import PersonIcon from '@mui/icons-material/Person';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
+import EnhancedEncryptionIcon from '@mui/icons-material/EnhancedEncryption';
 
 const cities = [
     'Dhaka', 'Chattogram', 'Rajshahi', 'Barishal', 'Sylhet',
@@ -338,6 +339,7 @@ function AccountSettings() {
                                         onChange={e => setSecurity({ ...security, confirm: e.target.value })}
                                     />
                                     <Button type="submit" variant="contained" sx={{ textTransform: 'none' }}>
+                                        <EnhancedEncryptionIcon sx={{ mr: 1 }} />
                                         Update Password
                                     </Button>
                                 </Box>
@@ -353,11 +355,8 @@ function AccountSettings() {
                             </Typography>
                             <Divider sx={{ mb: 2 }} />
                             <Stack direction="row" spacing={1} alignItems="center">
-                                <IconButton color="error" onClick={onDeleteAccount}>
-                                    <DeleteForeverIcon />
-                                </IconButton>
                                 <Button color="error" variant="contained" onClick={onDeleteAccount} sx={{ textTransform: 'none' }}>
-                                    Delete Account
+                                    <DeleteForeverIcon sx={{ mr: 1 }} />Delete Account
                                 </Button>
                             </Stack>
                         </CardContent>
