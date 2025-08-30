@@ -1,11 +1,13 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { admin } from '../../services/api';
-import { Box, Card, CardHeader, CardContent, Button, Stack, Dialog, DialogTitle, DialogContent, DialogActions, TextField, IconButton, Tooltip, Snackbar, Alert } from '@mui/material';
+import { Box, Card, CardHeader, CardContent, Button, Stack, Dialog, DialogTitle, DialogContent, DialogActions, TextField, IconButton, Tooltip, Snackbar, Alert, InputAdornment } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
+import SearchIcon from '@mui/icons-material/Search';
 
 export default function AdminBooks() {
     const [rows, setRows] = useState([]);
+    const [searchTerm, setSearchTerm] = useState('');
     const [open, setOpen] = useState(false);
     const [form, setForm] = useState({ title: '', author: '', genre: '', year: '', image: '' });
     const [editingId, setEditingId] = useState(null);
@@ -40,13 +42,38 @@ export default function AdminBooks() {
         load();
     };
 
+    // Filter books based on search term
+    const filteredRows = useMemo(() => {
+        if (!searchTerm.trim()) return rows;
+        const term = searchTerm.toLowerCase();
+        return rows.filter(book =>
+            book.title?.toLowerCase().includes(term) ||
+            book.author?.toLowerCase().includes(term) ||
+            book.genre?.toLowerCase().includes(term)
+        );
+    }, [rows, searchTerm]);
+
     return (
         <Box p={3}>
             <Card>
                 <CardHeader title="Books" action={<Button onClick={openCreate} variant="contained">New Book</Button>} />
                 <CardContent>
+                    <TextField
+                        fullWidth
+                        placeholder="Search books by title, author, or genre..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        sx={{ mb: 2 }}
+                        InputProps={{
+                            startAdornment: (
+                                <InputAdornment position="start">
+                                    <SearchIcon />
+                                </InputAdornment>
+                            ),
+                        }}
+                    />
                     <Stack spacing={1}>
-                        {rows.map(b => (
+                        {filteredRows.map(b => (
                             <Stack key={b._id} direction="row" justifyContent="space-between" alignItems="center" sx={{ border: '1px solid #eee', borderRadius: 1, p: 1 }}>
                                 <Box>
                                     <strong>{b.title}</strong> — {b.author} ({b.genre})
@@ -57,6 +84,11 @@ export default function AdminBooks() {
                                 </Box>
                             </Stack>
                         ))}
+                        {filteredRows.length === 0 && searchTerm && (
+                            <Box sx={{ textAlign: 'center', py: 2, color: 'text.secondary' }}>
+                                No books found matching "{searchTerm}"
+                            </Box>
+                        )}
                     </Stack>
                 </CardContent>
             </Card>

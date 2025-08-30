@@ -1,13 +1,15 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { admin } from '../../services/api';
-import { Box, Card, CardHeader, CardContent, Button, Stack, Dialog, DialogTitle, DialogContent, DialogActions, TextField, IconButton, Tooltip, Snackbar, Alert, MenuItem } from '@mui/material';
+import { Box, Card, CardHeader, CardContent, Button, Stack, Dialog, DialogTitle, DialogContent, DialogActions, TextField, IconButton, Tooltip, Snackbar, Alert, MenuItem, InputAdornment } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
+import SearchIcon from '@mui/icons-material/Search';
 
 export default function AdminInventories() {
     const [rows, setRows] = useState([]);
     const [libs, setLibs] = useState([]);
     const [books, setBooks] = useState([]);
+    const [searchTerm, setSearchTerm] = useState('');
     const [open, setOpen] = useState(false);
     const [form, setForm] = useState({ library: '', book: '', stock: 0, price: '' });
     const [editingId, setEditingId] = useState(null);
@@ -52,13 +54,42 @@ export default function AdminInventories() {
     const libById = useMemo(() => Object.fromEntries(libs.map(l => [l._id, l])), [libs]);
     const bookById = useMemo(() => Object.fromEntries(books.map(b => [b._id, b])), [books]);
 
+    // Filter inventory based on search term
+    const filteredRows = useMemo(() => {
+        if (!searchTerm.trim()) return rows;
+        const term = searchTerm.toLowerCase();
+        return rows.filter(row => {
+            const libraryName = (row.library?.name) || libById[row.library]?.name || '';
+            const bookTitle = (row.book?.title) || bookById[row.book]?.title || '';
+            const bookAuthor = (row.book?.author) || bookById[row.book]?.author || '';
+
+            return libraryName.toLowerCase().includes(term) ||
+                bookTitle.toLowerCase().includes(term) ||
+                bookAuthor.toLowerCase().includes(term);
+        });
+    }, [rows, searchTerm, libById, bookById]);
+
     return (
         <Box p={3}>
             <Card>
                 <CardHeader title="Inventories" action={<Button onClick={openCreate} variant="contained">New Inventory</Button>} />
                 <CardContent>
+                    <TextField
+                        fullWidth
+                        placeholder="Search by library name, book title, or author..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        sx={{ mb: 2 }}
+                        InputProps={{
+                            startAdornment: (
+                                <InputAdornment position="start">
+                                    <SearchIcon />
+                                </InputAdornment>
+                            ),
+                        }}
+                    />
                     <Stack spacing={1}>
-                        {rows.map(r => (
+                        {filteredRows.map(r => (
                             <Stack key={r._id} direction="row" justifyContent="space-between" alignItems="center" sx={{ border: '1px solid #eee', borderRadius: 1, p: 1 }}>
                                 <Box>
                                     <strong>{(r.library?.name) || libById[r.library]?.name}</strong> — {(r.book?.title) || bookById[r.book]?.title}
@@ -70,6 +101,11 @@ export default function AdminInventories() {
                                 </Box>
                             </Stack>
                         ))}
+                        {filteredRows.length === 0 && searchTerm && (
+                            <Box sx={{ textAlign: 'center', py: 2, color: 'text.secondary' }}>
+                                No inventory records found matching "{searchTerm}"
+                            </Box>
+                        )}
                     </Stack>
                 </CardContent>
             </Card>

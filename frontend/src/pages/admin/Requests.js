@@ -1,6 +1,7 @@
-import React, { useCallback, useEffect, useState } from 'react';
-import { Box, Card, CardHeader, CardContent, Tabs, Tab, Stack, IconButton, Tooltip, Typography, Button, Chip, Snackbar, Alert } from '@mui/material';
+import React, { useCallback, useEffect, useState, useMemo } from 'react';
+import { Box, Card, CardHeader, CardContent, Tabs, Tab, Stack, IconButton, Tooltip, Typography, Button, Chip, Snackbar, Alert, TextField, InputAdornment } from '@mui/material';
 import RefreshIcon from '@mui/icons-material/Refresh';
+import SearchIcon from '@mui/icons-material/Search';
 import { admin } from '../../services/api';
 
 const STATUS = ['pending', 'approved', 'rejected', 'delayed'];
@@ -8,6 +9,7 @@ const STATUS = ['pending', 'approved', 'rejected', 'delayed'];
 export default function AdminRequests() {
     const [tab, setTab] = useState(0);
     const [rows, setRows] = useState([]);
+    const [searchTerm, setSearchTerm] = useState('');
     const [loading, setLoading] = useState(false);
     const [snack, setSnack] = useState({ open: false, severity: 'success', message: '' });
 
@@ -43,6 +45,23 @@ export default function AdminRequests() {
         catch { setSnack({ open: true, severity: 'error', message: 'Delete failed' }); }
     };
 
+    // Filter requests based on search term
+    const filteredRows = useMemo(() => {
+        if (!searchTerm.trim()) return rows;
+        const term = searchTerm.toLowerCase();
+        return rows.filter(request => {
+            const userName = `${request.user?.firstName || ''} ${request.user?.lastName || ''}`.toLowerCase();
+            const userEmail = (request.user?.email || '').toLowerCase();
+            const libraryName = (request.library?.name || '').toLowerCase();
+            const bookTitles = request.items?.map(item => item.book?.title || '').join(' ').toLowerCase() || '';
+
+            return userName.includes(term) ||
+                userEmail.includes(term) ||
+                libraryName.includes(term) ||
+                bookTitles.includes(term);
+        });
+    }, [rows, searchTerm]);
+
     return (
         <Box p={3}>
             <Card>
@@ -63,10 +82,27 @@ export default function AdminRequests() {
                         <Tab label="Delayed" />
                     </Tabs>
 
+                    <TextField
+                        fullWidth
+                        placeholder="Search by user name, email, library, or book titles..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        sx={{ mb: 2 }}
+                        InputProps={{
+                            startAdornment: (
+                                <InputAdornment position="start">
+                                    <SearchIcon />
+                                </InputAdornment>
+                            ),
+                        }}
+                    />
+
                     <Stack spacing={2}>
-                        {rows.length === 0 ? (
-                            <Typography color="text.secondary">{loading ? 'Loading…' : 'No requests found.'}</Typography>
-                        ) : rows.map(r => (
+                        {filteredRows.length === 0 ? (
+                            <Typography color="text.secondary">
+                                {loading ? 'Loading…' : searchTerm ? `No requests found matching "${searchTerm}"` : 'No requests found.'}
+                            </Typography>
+                        ) : filteredRows.map(r => (
                             <Card key={r._id} variant="outlined">
                                 <CardContent>
                                     <Stack direction={{ xs: 'column', md: 'row' }} justifyContent="space-between" gap={1.5}>

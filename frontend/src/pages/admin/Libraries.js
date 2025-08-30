@@ -1,11 +1,13 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { admin } from '../../services/api';
-import { Box, Card, CardHeader, CardContent, Button, Stack, Dialog, DialogTitle, DialogContent, DialogActions, TextField, IconButton, Tooltip, Snackbar, Alert } from '@mui/material';
+import { Box, Card, CardHeader, CardContent, Button, Stack, Dialog, DialogTitle, DialogContent, DialogActions, TextField, IconButton, Tooltip, Snackbar, Alert, InputAdornment } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
+import SearchIcon from '@mui/icons-material/Search';
 
 export default function AdminLibraries() {
     const [rows, setRows] = useState([]);
+    const [searchTerm, setSearchTerm] = useState('');
     const [open, setOpen] = useState(false);
     const [form, setForm] = useState({ name: '', address1: '', address2: '', city: '', zip: '', owner: '' });
     const [editingId, setEditingId] = useState(null);
@@ -40,13 +42,39 @@ export default function AdminLibraries() {
         load();
     };
 
+    // Filter libraries based on search term
+    const filteredRows = useMemo(() => {
+        if (!searchTerm.trim()) return rows;
+        const term = searchTerm.toLowerCase();
+        return rows.filter(library =>
+            library.name?.toLowerCase().includes(term) ||
+            library.city?.toLowerCase().includes(term) ||
+            library.zip?.toLowerCase().includes(term) ||
+            library.address1?.toLowerCase().includes(term)
+        );
+    }, [rows, searchTerm]);
+
     return (
         <Box p={3}>
             <Card>
                 <CardHeader title="Libraries" action={<Button onClick={openCreate} variant="contained">New Library</Button>} />
                 <CardContent>
+                    <TextField
+                        fullWidth
+                        placeholder="Search libraries by name, city, zip, or address..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        sx={{ mb: 2 }}
+                        InputProps={{
+                            startAdornment: (
+                                <InputAdornment position="start">
+                                    <SearchIcon />
+                                </InputAdornment>
+                            ),
+                        }}
+                    />
                     <Stack spacing={1}>
-                        {rows.map(l => (
+                        {filteredRows.map(l => (
                             <Stack key={l._id} direction="row" justifyContent="space-between" alignItems="center" sx={{ border: '1px solid #eee', borderRadius: 1, p: 1 }}>
                                 <Box>
                                     <strong>{l.name}</strong> — {l.city}, {l.zip}
@@ -57,6 +85,11 @@ export default function AdminLibraries() {
                                 </Box>
                             </Stack>
                         ))}
+                        {filteredRows.length === 0 && searchTerm && (
+                            <Box sx={{ textAlign: 'center', py: 2, color: 'text.secondary' }}>
+                                No libraries found matching "{searchTerm}"
+                            </Box>
+                        )}
                     </Stack>
                 </CardContent>
             </Card>
