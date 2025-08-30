@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const User = require('../models/User');
 const Book = require('../models/Book');
 const Inventory = require('../models/Inventory');
+const recommendationService = require('../services/recommendationService');
 
 const BOOK_PROJECTION = 'title author genre image rating year'; // tweak as you like
 
@@ -33,12 +34,39 @@ exports.getOverview = async (req, res, next) => {
             available: !!availabilityMap[String(b._id)]
         }));
 
+        // Get AI recommendations based on finished books
+        const finishedBookIds = (user.finished || []).map(book => book._id.toString());
+        const recommendations = await recommendationService.getRecommendationsWithDetails(finishedBookIds, 6);
+
+        // Get recommended book details
+        const recommendedBookIds = recommendations.map(rec => rec.bookId);
+        const recommendedBooks = await Book.find({ _id: { $in: recommendedBookIds } })
+            .select(BOOK_PROJECTION)
+            .lean();
+
+        // Map recommendations with book details
+        const recommendationsWithDetails = recommendations.map(rec => {
+            const book = recommendedBooks.find(b => b._id.toString() === rec.bookId);
+            return {
+                ...rec,
+                book: book || {
+                    _id: rec.bookId,
+                    title: rec.title,
+                    author: 'Unknown Author',
+                    genre: 'Unknown Genre',
+                    rating: 0,
+                    image: '/images/books/default-book.jpg'
+                }
+            };
+        });
+
         res.json({
             currentlyReading: user.currentlyReading || [],
             wantToRead: wantWithAvailability,
             finished: user.finished || [],
             favorites: user.favorites || [],
-            booksReadThisYear: (user.finished || []).length // (optionally filter by year if you store dates)
+            booksReadThisYear: (user.finished || []).length, // (optionally filter by year if you store dates)
+            recommendations: recommendationsWithDetails
         });
     } catch (err) { next(err); }
 };
