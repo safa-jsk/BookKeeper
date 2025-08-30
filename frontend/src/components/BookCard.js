@@ -1,11 +1,20 @@
 import React from 'react';
-import { Card, CardContent, CardMedia, Typography, Button, Stack, IconButton, Tooltip } from '@mui/material';
+import { Card, CardContent, CardMedia, Typography, Button, Stack, IconButton, Tooltip, Chip, Box } from '@mui/material';
 import AddShoppingCartIcon from '@mui/icons-material/AddShoppingCart';
+import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import { addCartItem } from '../services/api';
 import { Link } from 'react-router-dom';
 import { useTheme } from '@mui/material/styles';
 
-export default function BookCard({ book, onRemove, onReview, onAddToFinished, onAddedToCart }) {
+// Utility function to get confidence color
+export const getConfidenceColor = (confidence) => {
+    const score = parseFloat(confidence);
+    if (score >= 80) return 'success';
+    if (score >= 60) return 'warning';
+    return 'default';
+};
+
+export default function BookCard({ book, onRemove, onReview, onAddToFinished, onAddedToCart, onWantToRead }) {
     const theme = useTheme();
     return (
         <Card
@@ -65,6 +74,22 @@ export default function BookCard({ book, onRemove, onReview, onAddToFinished, on
                 <Typography variant="body2" color={theme.palette.primary.main} align="center">
                     <strong>Rating:</strong> {book.rating ? book.rating.toFixed(1) : 'N/A'}
                 </Typography>
+
+                {/* AI Confidence Display */}
+                {book.confidence && (
+                    <Box sx={{ display: 'flex', justifyContent: 'center', mt: 1 }}>
+                        <Tooltip title={`AI Confidence: ${book.confidence}`}>
+                            <Chip
+                                icon={<AutoAwesomeIcon sx={{ fontSize: 16 }} />}
+                                label={book.confidence}
+                                size="small"
+                                color={book.confidenceColor || getConfidenceColor(book.confidence)}
+                                variant="filled"
+                                sx={{ fontSize: '0.75rem' }}
+                            />
+                        </Tooltip>
+                    </Box>
+                )}
             </CardContent>
 
             <Stack direction="column" spacing={1} sx={{ p: 2, pt: 0 }}>
@@ -110,6 +135,18 @@ export default function BookCard({ book, onRemove, onReview, onAddToFinished, on
                         sx={{ borderRadius: 2, mt: 1, fontWeight: 600 }}
                     >
                         Remove
+                    </Button>
+                )}
+
+                {onWantToRead && (
+                    <Button
+                        size="small"
+                        variant="outlined"
+                        color="primary"
+                        onClick={() => onWantToRead(book._id)}
+                        sx={{ borderRadius: 2, mt: 1, fontWeight: 600 }}
+                    >
+                        Add to Want to Read
                     </Button>
                 )}
 

@@ -39,18 +39,18 @@ exports.getOverview = async (req, res, next) => {
         const recommendations = await recommendationService.getRecommendationsWithDetails(finishedBookIds, 6);
 
         // Get recommended book details
-        const recommendedBookIds = recommendations.map(rec => rec.bookId);
+        const recommendedBookIds = recommendations.map(rec => rec.dbId);
         const recommendedBooks = await Book.find({ _id: { $in: recommendedBookIds } })
             .select(BOOK_PROJECTION)
             .lean();
 
         // Map recommendations with book details
         const recommendationsWithDetails = recommendations.map(rec => {
-            const book = recommendedBooks.find(b => b._id.toString() === rec.bookId);
+            const book = recommendedBooks.find(b => b._id.toString() === rec.dbId);
             return {
                 ...rec,
                 book: book || {
-                    _id: rec.bookId,
+                    _id: rec.dbId,
                     title: rec.title,
                     author: 'Unknown Author',
                     genre: 'Unknown Genre',

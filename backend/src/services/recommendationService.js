@@ -88,7 +88,7 @@ class RecommendationService {
             .filter(Boolean);
     }
 
-    getRecommendations(finishedRecIds, limit = 10) {
+    getRecommendations(finishedRecIds, limit = 5) {
         if (!this.recommendations || !finishedRecIds || finishedRecIds.length === 0) {
             console.log('No recommendations available or no finished books');
             return [];
@@ -117,7 +117,7 @@ class RecommendationService {
     }
 
     // 🚫 IMPORTANT: never return recId as a Mongo _id
-    async getRecommendationsWithDetails(finishedDbIds, limit = 10) {
+    async getRecommendationsWithDetails(finishedDbIds, limit = 5) {
         // 1) DB -> rec indices
         const finishedRecIds = await this.convertDbIdsToRecIds(finishedDbIds);
         if (finishedRecIds.length === 0) {
