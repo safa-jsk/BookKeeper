@@ -149,10 +149,18 @@ function BookDetail() {
 
           <Divider sx={{ my: 3 }} />
 
-          <Typography variant="h5" sx={{ mb: 2 }}>Description</Typography>
-          <Typography variant="body1" sx={{ whiteSpace: 'pre-line' }}>
-            {book.summary || 'No description available.'}
+          <Typography variant="h5" sx={{ mb: 2 }}>Summary</Typography>
+          <Typography
+            variant="body1"
+            sx={{
+              maxWidth: '60%',
+              whiteSpace: 'pre-line',
+              wordBreak: 'break-word'
+            }}
+          >
+            {book.summary || 'No summary available.'}
           </Typography>
+
 
           <Divider sx={{ my: 3 }} />
 
@@ -227,7 +235,7 @@ function BookDetail() {
         <Grid item xs={12} md={5} lg={4}
           sx={{
             display: 'flex',
-            flexDirection: 'column',        // Make children stack vertically!
+            flexDirection: 'column',
             justifyContent: { xs: 'center', md: 'flex-start' },
             alignItems: { xs: 'center', md: 'flex-end' }
           }}>

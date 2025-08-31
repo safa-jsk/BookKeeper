@@ -2,6 +2,16 @@
 import React from 'react';
 import { Drawer, List, ListItemButton, ListItemText, Toolbar } from '@mui/material';
 import { Link, useLocation, useParams } from 'react-router-dom';
+import {
+    Dashboard as DashboardIcon,
+    Book as WantToReadIcon,
+    Book as CurrentlyReadingIcon,
+    Book as FavoritesIcon,
+    Book as FinishedIcon,
+    Book as RequestsIcon,
+    Inventory as InventoryIcon,
+    Settings as SettingsIcon
+} from '@mui/icons-material';
 
 const drawerWidth = 240;
 
@@ -45,18 +55,49 @@ export default function LeftDrawer({ user }) {
     };
 
     const items = [
-        { label: 'Dashboard', to: '/dashboard', show: true },
-        { label: 'Want to Read', to: '/dashboard/want-to-read', show: true },
-        { label: 'Currently Reading', to: '/dashboard/currently-reading', show: true },
-        { label: 'Favorites', to: '/dashboard/favorites', show: true },
-        { label: 'Finished', to: '/dashboard/finished', show: true },
+        { label: 'Dashboard', to: '/dashboard', show: true, icon: DashboardIcon },
+        { label: 'Want to Read', to: '/dashboard/want-to-read', show: true, icon: WantToReadIcon },
+        { label: 'Currently Reading', to: '/dashboard/currently-reading', show: true, icon: CurrentlyReadingIcon },
+        { label: 'Favorites', to: '/dashboard/favorites', show: true, icon: FavoritesIcon },
+        { label: 'Finished', to: '/dashboard/finished', show: true, icon: FinishedIcon },
         // Librarian extras (Option B paths)
-        { label: 'Inventory', to: inventoryTo, show: role === 'librarian' },
-        { label: 'Requested Books', to: requestsTo, show: role === 'librarian' },
+        { label: 'Inventory', to: inventoryTo, show: role === 'librarian', icon: InventoryIcon },
+        { label: 'Requested Books', to: requestsTo, show: role === 'librarian', icon: RequestsIcon },
     ].filter(i => i.show);
 
     // Admin uses a different layout; hide drawer here if admin
-    if (role === 'admin') return null;
+    if (role === 'admin') {
+        // For admin users, show a simplified drawer with just account settings
+        const adminItems = [
+            { label: 'Account Settings', to: '/admin/account-settings', icon: SettingsIcon },
+        ];
+
+        return (
+            <Drawer
+                variant="permanent"
+                sx={{
+                    width: drawerWidth,
+                    flexShrink: 0,
+                    '& .MuiDrawer-paper': { width: drawerWidth, boxSizing: 'border-box' }
+                }}
+            >
+                <Toolbar />
+                <List>
+                    {adminItems.map(it => (
+                        <ListItemButton
+                            key={it.label}
+                            component={Link}
+                            to={it.to}
+                            selected={location.pathname === it.to}
+                        >
+                            <it.icon sx={{ mr: 2, fontSize: 20 }} />
+                            <ListItemText primary={it.label} />
+                        </ListItemButton>
+                    ))}
+                </List>
+            </Drawer>
+        );
+    }
 
     return (
         <Drawer
@@ -75,7 +116,16 @@ export default function LeftDrawer({ user }) {
                         component={Link}
                         to={it.to}
                         selected={isSelected(it.to)}
+                        sx={{
+                            '&.Mui-selected': {
+                                backgroundColor: 'primary.light',
+                                '&:hover': {
+                                    backgroundColor: 'primary.light',
+                                }
+                            }
+                        }}
                     >
+                        <it.icon sx={{ mr: 2, fontSize: 20 }} />
                         <ListItemText primary={it.label} />
                     </ListItemButton>
                 ))}

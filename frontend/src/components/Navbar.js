@@ -50,6 +50,15 @@ export default function Navbar({ user, onLogout }) {
     navigate('/dashboard'); // reader
   };
 
+  const goToRoleSettings = () => {
+    setAnchorEl(null);
+    if (role === 'admin') {
+      navigate('/admin/admin-account-settings');
+      return;
+    }
+    navigate('/dashboard/account-settings');
+  };
+
   return (
     <AppBar
       position="sticky"
@@ -81,7 +90,7 @@ export default function Navbar({ user, onLogout }) {
                 <MenuItem onClick={goToRoleHome}>
                   {role === 'admin' ? 'Admin Panel' : 'Dashboard'}
                 </MenuItem>
-                <MenuItem component={Link} to="/dashboard/account-settings" onClick={() => setAnchorEl(null)}>
+                <MenuItem onClick={goToRoleSettings}>
                   Account Settings
                 </MenuItem>
                 <MenuItem onClick={() => { setAnchorEl(null); onLogout(); }}>

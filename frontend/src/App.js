@@ -25,13 +25,14 @@ import LibrarianRequests from './pages/librarian/Requests';
 import LibrarianHomeResolver from './pages/librarian/HomeResolver';
 
 import AdminLayout from './pages/admin/Layout';
+import AdminHome from './pages/admin/Home';
 import AdminLibrarianApplications from './pages/admin/LibrarianApplications';
 import AdminRequests from './pages/admin/Requests';
 import BooksAdmin from './pages/admin/Books';
 import InventoryAdmin from './pages/admin/Inventory';
 import UsersAdmin from './pages/admin/Users';
 import LibrariesAdmin from './pages/admin/Libraries';
-import RequestsAdmin from './pages/admin/Requests';
+import AdminAccountSettings from './pages/admin/AccountSettings';
 
 import './styles/styles.css';
 import { ThemeProvider } from '@mui/material/styles';
@@ -122,7 +123,7 @@ function App() {
   // Optional: client-side role guard (server still enforces)
   const RequireRole = ({ roles, children, user }) => {
     const token = localStorage.getItem('token');
-    if (!token || !user) return <Navigate to="/login" replace />;
+    if (!token || !user) return <Navigate to="/" replace />;
     if (!roles.includes(user.role)) return <Navigate to="/" replace />;
     return children;
   };
@@ -158,18 +159,15 @@ function App() {
           </Route>
 
           {/* Admin panel */}
-          <Route
-            path="/admin"
-            element={<RequireRole roles={['admin']} user={user}><AdminLayout /></RequireRole>}
-          >
-            <Route index element={<Navigate to="/admin/librarian-applications" replace />} />
+          <Route path="/admin/*" element={<RequireRole roles={['admin']} user={user}><AdminLayout /></RequireRole>}>
+            <Route index element={<AdminHome />} />
             <Route path="librarian-applications" element={<AdminLibrarianApplications />} />
             <Route path="requests" element={<AdminRequests />} />
             <Route path="books" element={<BooksAdmin />} />
             <Route path="inventory" element={<InventoryAdmin />} />
             <Route path="users" element={<UsersAdmin />} />
             <Route path="libraries" element={<LibrariesAdmin />} />
-            <Route path="requests" element={<RequestsAdmin />} />
+            <Route path="admin-account-settings" element={<AdminAccountSettings user={user} onLogout={handleLogout} />} />
           </Route>
 
           <Route path="/cart" element={<Cart />} />

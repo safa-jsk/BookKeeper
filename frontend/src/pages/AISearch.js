@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Box, Card, CardHeader, CardContent, Stack, TextField, Typography, Chip, Grid, Alert } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 import BookCard from '../components/BookCard';
 import { books as booksApi } from '../services/api';
 
@@ -105,6 +106,7 @@ function scoreBook(book, q, constraints) {
 }
 
 export default function AISearch() {
+    const theme = useTheme();
     const [q, setQ] = useState('');
     const [list, setList] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -145,11 +147,21 @@ export default function AISearch() {
                 <CardHeader title="AI Book Search" subheader="Search by intent, author, genre, rating, year" />
                 <CardContent>
                     <Stack spacing={2}>
-                        <TextField
+                        <input
+                            type="text"
                             value={q}
                             onChange={e => setQ(e.target.value)}
                             placeholder="e.g., cozy fantasy after 2000 by sanderson rated above 4"
-                            fullWidth
+                            style={{
+                                padding: '10px',
+                                width: '60%',
+                                borderRadius: '8px',
+                                border: `1.5px solid ${theme.palette.info.main}`,
+                                background: theme.palette.background.default,
+                                color: theme.palette.primary.main,
+                                fontSize: 16,
+                                outline: 'none'
+                            }}
                         />
                         <Stack direction="row" spacing={1} alignItems="center">
                             {constraints.author && <Chip label={`Author: ${constraints.author}`} />}

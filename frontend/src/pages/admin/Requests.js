@@ -1,12 +1,13 @@
 import React, { useCallback, useEffect, useState, useMemo } from 'react';
-import { Box, Card, CardHeader, CardContent, Tabs, Tab, Stack, IconButton, Tooltip, Typography, Button, Chip, Snackbar, Alert, TextField, InputAdornment } from '@mui/material';
+import { Box, Card, CardHeader, CardContent, Tabs, Tab, Stack, IconButton, Tooltip, Typography, Button, Chip, Snackbar, Alert, TextField } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 import RefreshIcon from '@mui/icons-material/Refresh';
-import SearchIcon from '@mui/icons-material/Search';
 import { admin } from '../../services/api';
 
 const STATUS = ['pending', 'approved', 'rejected', 'delayed'];
 
 export default function AdminRequests() {
+    const theme = useTheme();
     const [tab, setTab] = useState(0);
     const [rows, setRows] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
@@ -82,18 +83,20 @@ export default function AdminRequests() {
                         <Tab label="Delayed" />
                     </Tabs>
 
-                    <TextField
-                        fullWidth
+                    <input
+                        type="text"
                         placeholder="Search by user name, email, library, or book titles..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        sx={{ mb: 2 }}
-                        InputProps={{
-                            startAdornment: (
-                                <InputAdornment position="start">
-                                    <SearchIcon />
-                                </InputAdornment>
-                            ),
+                        style={{
+                            padding: '10px',
+                            width: '60%',
+                            borderRadius: '8px',
+                            border: `1.5px solid ${theme.palette.info.main}`,
+                            background: theme.palette.background.default,
+                            color: theme.palette.primary.main,
+                            fontSize: 16,
+                            outline: 'none'
                         }}
                     />
 

@@ -3,15 +3,16 @@ import {
     Box, Card, CardHeader, CardContent, Tabs, Tab, TextField, Stack, IconButton, Button,
     Dialog, DialogTitle, DialogContent, DialogActions, Typography, Chip, Snackbar, Alert, Tooltip, Divider
 } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 import CheckIcon from '@mui/icons-material/Check';
 import CloseIcon from '@mui/icons-material/Close';
 import RefreshIcon from '@mui/icons-material/Refresh';
-import SearchIcon from '@mui/icons-material/Search';
 import { admin } from '../../services/api';
 
 const STATUS = ['pending', 'approved', 'rejected'];
 
 export default function AdminLibrarianApplications() {
+    const theme = useTheme();
     const [tab, setTab] = useState(0);
     const [rows, setRows] = useState([]);
     const [q, setQ] = useState('');
@@ -88,13 +89,21 @@ export default function AdminLibrarianApplications() {
                     </Tabs>
 
                     <Stack direction="row" spacing={2} alignItems="center" sx={{ mb: 2 }}>
-                        <TextField
-                            size="small"
+                        <input
+                            type="text"
                             placeholder="Search name, email, library, city, phone"
                             value={q}
                             onChange={e => setQ(e.target.value)}
-                            InputProps={{ startAdornment: <SearchIcon fontSize="small" sx={{ mr: 1, opacity: 0.6 }} /> }}
-                            fullWidth
+                            style={{
+                                padding: '10px',
+                                width: '60%',
+                                borderRadius: '8px',
+                                border: `1.5px solid ${theme.palette.info.main}`,
+                                background: theme.palette.background.default,
+                                color: theme.palette.primary.main,
+                                fontSize: 16,
+                                outline: 'none'
+                            }}
                         />
                     </Stack>
 

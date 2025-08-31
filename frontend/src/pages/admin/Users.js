@@ -1,11 +1,12 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { admin } from '../../services/api';
-import { Box, Card, CardHeader, CardContent, Button, Stack, Dialog, DialogTitle, DialogContent, DialogActions, TextField, IconButton, Tooltip, Snackbar, Alert, InputAdornment } from '@mui/material';
+import { Box, Card, CardHeader, CardContent, Button, Stack, Dialog, DialogTitle, DialogContent, DialogActions, TextField, IconButton, Tooltip, Snackbar, Alert } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
-import SearchIcon from '@mui/icons-material/Search';
 
 export default function AdminUsers() {
+    const theme = useTheme();
     const [rows, setRows] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [open, setOpen] = useState(false);
@@ -60,18 +61,20 @@ export default function AdminUsers() {
             <Card>
                 <CardHeader title="Users" action={<Button onClick={openCreate} variant="contained">New User</Button>} />
                 <CardContent>
-                    <TextField
-                        fullWidth
+                    <input
+                        type="text"
                         placeholder="Search users by name, email, role, or city..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        sx={{ mb: 2 }}
-                        InputProps={{
-                            startAdornment: (
-                                <InputAdornment position="start">
-                                    <SearchIcon />
-                                </InputAdornment>
-                            ),
+                        style={{
+                            padding: '10px',
+                            width: '60%',
+                            borderRadius: '8px',
+                            border: `1.5px solid ${theme.palette.info.main}`,
+                            background: theme.palette.background.default,
+                            color: theme.palette.primary.main,
+                            fontSize: 16,
+                            outline: 'none'
                         }}
                     />
                     <Stack spacing={1}>

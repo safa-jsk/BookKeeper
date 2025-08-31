@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useTheme } from '@mui/material/styles';
 import axios from 'axios';
 import {
-  Typography, Button, Grid, Box, FormControl, InputLabel, Select, MenuItem, Fade, Pagination
+  Typography, Grid, Box, FormControl, InputLabel, Select, MenuItem, Fade, Pagination
 } from '@mui/material';
 import BookCard from '../components/BookCard';
 
