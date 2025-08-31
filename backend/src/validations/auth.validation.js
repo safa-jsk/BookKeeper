@@ -14,3 +14,13 @@ exports.login = Joi.object({
     email: Joi.string().email().required(),
     password: Joi.string().min(1).required(),
 });
+
+exports.forgotPassword = Joi.object({
+    email: Joi.string().email().required(),
+    dob: Joi.date().iso().required(),
+});
+
+exports.resetPassword = Joi.object({
+    token: Joi.string().required(),
+    newPassword: Joi.string().min(6).required(),
+});
