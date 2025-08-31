@@ -5,7 +5,6 @@ import {
   Typography, Grid, Box, FormControl, InputLabel, Select, MenuItem, Fade, Pagination, Snackbar, Alert
 } from '@mui/material';
 import BookCard from '../components/BookCard';
-import { me } from '../services/api';
 
 
 function BookList() {
@@ -99,24 +98,6 @@ function BookList() {
     fetchBooks(searchQuery, filter, 1);
   };
 
-  const handleAddToWantToRead = async (bookId) => {
-    try {
-      await me.addBookToCategory(bookId, 'wantToRead');
-      setSnackbar({
-        open: true,
-        message: 'Book added to Want to Read list!',
-        severity: 'success'
-      });
-    } catch (error) {
-      console.error('Error adding book to want to read:', error);
-      setSnackbar({
-        open: true,
-        message: error.response?.data?.message || 'Failed to add book to Want to Read list',
-        severity: 'error'
-      });
-    }
-  };
-
   const handleCloseSnackbar = () => {
     setSnackbar({ ...snackbar, open: false });
   };
@@ -195,7 +176,7 @@ function BookList() {
         {books.map((book) => (
           <Fade in={!loading} key={book._id}>
             <Grid item xs={12} sm={6} md={4} lg={3} sx={{ display: 'flex', justifyContent: 'center' }}>
-              <BookCard book={book} onWantToRead={handleAddToWantToRead} />
+              <BookCard book={book} />
             </Grid>
           </Fade>
         ))}

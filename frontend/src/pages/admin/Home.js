@@ -138,8 +138,8 @@ export default function AdminHome() {
                 Welcome to the BookKeeper Admin Panel. Here's an overview of your system statistics.
             </Typography>
 
-            <Grid container spacing={3} sx={{ maxWidth: 1200, mx: 'auto' }}>
-                <Grid item xs={12} sm={6} md={3}>
+            <Grid container spacing={3} sx={{ minWidth: 600, maxWidth: 1200, mx: 'auto', alignItems: 'center' }}>
+                <Grid item xs={12} sm={6} md={3} minWidth={200} alignItems="center">
                     <StatCard
                         title="Total Users"
                         value={stats.users}
@@ -147,7 +147,7 @@ export default function AdminHome() {
                         color={theme.palette.primary.main}
                     />
                 </Grid>
-                <Grid item xs={12} sm={6} md={3}>
+                <Grid item xs={12} sm={6} md={3} minWidth={200} alignItems="center">
                     <StatCard
                         title="Libraries"
                         value={stats.libraries}
@@ -155,7 +155,7 @@ export default function AdminHome() {
                         color={theme.palette.secondary.main}
                     />
                 </Grid>
-                <Grid item xs={12} sm={6} md={3}>
+                <Grid item xs={12} sm={6} md={3} minWidth={200} alignItems="center">
                     <StatCard
                         title="Books"
                         value={stats.books}
@@ -163,7 +163,7 @@ export default function AdminHome() {
                         color={theme.palette.success.main}
                     />
                 </Grid>
-                <Grid item xs={12} sm={6} md={3}>
+                <Grid item xs={12} sm={6} md={3} minWidth={200} alignItems="center">
                     <StatCard
                         title="Pending Requests"
                         value={stats.pendingRequests}

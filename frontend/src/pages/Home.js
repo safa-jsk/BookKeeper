@@ -31,7 +31,7 @@ function Home({ onLogin, user }) {
           margin: '0 auto',
         }}
       >
-        {/* LEFT SIDE (expands to full width when logged in) */}
+        {/* LEFT SIDE (expands to full page width when logged in) */}
         <Grid
           item
           xs={12}
