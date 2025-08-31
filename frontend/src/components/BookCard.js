@@ -6,16 +6,19 @@ import { addCartItem } from '../services/api';
 import { Link } from 'react-router-dom';
 import { useTheme } from '@mui/material/styles';
 
-// Utility function to get confidence color
 export const getConfidenceColor = (confidence) => {
     const score = parseFloat(confidence);
-    if (score >= 80) return 'success';
-    if (score >= 60) return 'warning';
+    if (score >= 60) return 'success';
+    if (score >= 40) return 'warning';
     return 'default';
 };
 
 export default function BookCard({ book, onRemove, onReview, onAddToFinished, onAddedToCart, onWantToRead }) {
     const theme = useTheme();
+
+    // Check if the user is logged in (e.g., by checking for a valid token)
+    const isLoggedIn = Boolean(localStorage.getItem('token')); // You can replace this with your auth state logic
+
     return (
         <Card
             sx={{
@@ -28,6 +31,7 @@ export default function BookCard({ book, onRemove, onReview, onAddToFinished, on
                 boxShadow: '0 4px 16px #0001',
                 border: `2px solid ${theme.palette.background.paper}`,
                 transition: 'transform 0.22s',
+                position: 'relative',
                 '&:hover': {
                     boxShadow: '0 8px 24px #0002',
                     transform: 'scale(1.035)',
@@ -35,6 +39,41 @@ export default function BookCard({ book, onRemove, onReview, onAddToFinished, on
                 }
             }}
         >
+            {/* Show the Cart icon only if logged in */}
+            {isLoggedIn && (
+                <Box
+                    sx={{
+                        position: 'absolute',
+                        top: 0,
+                        right: 0,
+                        width: 70,
+                        height: 70,
+                        bgcolor: '#fff',
+                        clipPath: 'polygon(100% 0, 100% 100%, 0 0)',
+                        display: 'flex',
+                        alignItems: 'flex-start',
+                        justifyContent: 'flex-end',
+                        p: '4px'
+                    }}
+                >
+                    <Tooltip title="Add to Cart">
+                        <IconButton
+                            size="small"
+                            color="primary"
+                            onClick={async () => {
+                                try {
+                                    await addCartItem(book._id, 1);
+                                    onAddedToCart && onAddedToCart(book);
+                                } catch (_) { }
+                            }}
+                            sx={{ zIndex: 1, p: '4px' }}
+                        >
+                            <AddShoppingCartIcon fontSize="medium" />
+                        </IconButton>
+                    </Tooltip>
+                </Box>
+            )}
+
             <CardMedia
                 component="img"
                 height="170"
@@ -49,6 +88,7 @@ export default function BookCard({ book, onRemove, onReview, onAddToFinished, on
                     e.target.src = '/images/books/harry-potter-and-the-philosophers-stone.jpg';
                 }}
             />
+
             <CardContent sx={{ flexGrow: 1, p: 2 }}>
                 <Typography
                     gutterBottom
@@ -75,7 +115,6 @@ export default function BookCard({ book, onRemove, onReview, onAddToFinished, on
                     <strong>Rating:</strong> {book.rating ? book.rating.toFixed(1) : 'N/A'}
                 </Typography>
 
-                {/* AI Confidence Display */}
                 {book.confidence && (
                     <Box sx={{ display: 'flex', justifyContent: 'center', mt: 1 }}>
                         <Tooltip title={`AI Confidence: ${book.confidence}`}>
@@ -93,38 +132,24 @@ export default function BookCard({ book, onRemove, onReview, onAddToFinished, on
             </CardContent>
 
             <Stack direction="column" spacing={1} sx={{ p: 2, pt: 0 }}>
-                <Stack direction="row" justifyContent="space-between" alignItems="center">
-                    <Button
-                        size="small"
-                        component={Link}
-                        to={`/books/${book._id}`}
-                        color="primary"
-                        sx={{
-                            borderRadius: 2,
-                            background: theme.palette.primary.main,
-                            color: '#fff',
-                            fontWeight: 600,
-                            letterSpacing: 1,
-                            transition: 'background 0.18s',
-                            '&:hover': { background: theme.palette.secondary.main }
-                        }}
-                    >
-                        View Details
-                    </Button>
-                    <Tooltip title="Add to Cart">
-                        <IconButton
-                            color="primary"
-                            onClick={async () => {
-                                try {
-                                    await addCartItem(book._id, 1);
-                                    onAddedToCart && onAddedToCart(book);
-                                } catch (_) { }
-                            }}
-                        >
-                            <AddShoppingCartIcon />
-                        </IconButton>
-                    </Tooltip>
-                </Stack>
+                <Button
+                    fullWidth
+                    size="small"
+                    component={Link}
+                    to={`/books/${book._id}`}
+                    color="primary"
+                    sx={{
+                        borderRadius: 2,
+                        background: theme.palette.primary.main,
+                        color: '#fff',
+                        fontWeight: 600,
+                        letterSpacing: 1,
+                        transition: 'background 0.18s',
+                        '&:hover': { background: theme.palette.secondary.main }
+                    }}
+                >
+                    View Details
+                </Button>
 
                 {onRemove && (
                     <Button
@@ -150,7 +175,6 @@ export default function BookCard({ book, onRemove, onReview, onAddToFinished, on
                     </Button>
                 )}
 
-                {/* If onAddToFinished is provided, show that button; otherwise fall back to Review if available */}
                 {onAddToFinished ? (
                     <Button
                         size="small"

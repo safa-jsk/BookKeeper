@@ -19,7 +19,7 @@ function BookList() {
     currentPage: 1,
     totalPages: 1,
     totalBooks: 0,
-    booksPerPage: 25,
+    booksPerPage: 24,
     hasNextPage: false,
     hasPrevPage: false
   });
@@ -145,22 +145,6 @@ function BookList() {
             outline: 'none'
           }}
         />
-        <Button
-          variant="contained"
-          color="primary"
-          type="submit"
-          sx={{
-            padding: '10px 28px',
-            background: theme.palette.primary.main,
-            borderRadius: 2,
-            fontWeight: 600,
-            letterSpacing: 1,
-            boxShadow: 2,
-            '&:hover': { background: theme.palette.secondary.main }
-          }}
-        >
-          Search
-        </Button>
       </Box>
 
       {/* Results Info */}
