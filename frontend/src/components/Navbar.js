@@ -53,10 +53,21 @@ export default function Navbar({ user, onLogout }) {
   const goToRoleSettings = () => {
     setAnchorEl(null);
     if (role === 'admin') {
-      navigate('/admin/admin-account-settings');
+      navigate('/admin/account-settings');
       return;
     }
     navigate('/dashboard/account-settings');
+  };
+
+  const handleLogout = () => {
+    setAnchorEl(null);
+    if (onLogout) {
+      onLogout();
+    } else {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      window.location.href = '/';
+    }
   };
 
   return (
@@ -77,7 +88,6 @@ export default function Navbar({ user, onLogout }) {
             <Button color="inherit" component={Link} to="/browse" sx={{ textTransform: 'none' }}>Browse Books</Button>
             <Button color="inherit" component={Link} to="/trending" sx={{ textTransform: 'none' }}>Trending</Button>
             <Button color="inherit" component={Link} to="/map" sx={{ textTransform: 'none' }}>Map</Button>
-            <Button color="inherit" component={Link} to="/ai-search" sx={{ textTransform: 'none' }}>AI Search</Button>
           </Box>
 
           {/* User dropdown */}
@@ -93,7 +103,7 @@ export default function Navbar({ user, onLogout }) {
                 <MenuItem onClick={goToRoleSettings}>
                   Account Settings
                 </MenuItem>
-                <MenuItem onClick={() => { setAnchorEl(null); onLogout(); }}>
+                <MenuItem onClick={handleLogout}>
                   Logout
                 </MenuItem>
               </Menu>

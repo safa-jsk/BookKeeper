@@ -13,7 +13,7 @@ export const getConfidenceColor = (confidence) => {
     return 'default';
 };
 
-export default function BookCard({ book, onRemove, onReview, onAddToFinished, onAddedToCart, onWantToRead }) {
+export default function BookCard({ book, onRemove, onReview, onAddToFinished, onAddedToCart, onWantToRead, height = 420 }) {
     const theme = useTheme();
 
     // Check if the user is logged in (e.g., by checking for a valid token)
@@ -23,7 +23,7 @@ export default function BookCard({ book, onRemove, onReview, onAddToFinished, on
         <Card
             sx={{
                 width: 250,
-                height: 390,
+                height: height,
                 display: 'flex',
                 flexDirection: 'column',
                 borderRadius: 3,

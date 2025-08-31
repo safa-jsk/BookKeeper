@@ -7,10 +7,10 @@ const toId = (id) => new mongoose.Types.ObjectId(id);
 // GET /api/books/search
 exports.search = async (req, res, next) => {
     try {
-        const { query, filter, page = 1, limit = 25 } = req.query;
+        const { query, filter, page = 1, limit = 24 } = req.query;
         const q = (query || '').trim();
         const pageNum = parseInt(page) || 1;
-        const limitNum = parseInt(limit) || 25;
+        const limitNum = parseInt(limit) || 24;
         const skip = (pageNum - 1) * limitNum;
 
         let criteria = {};
@@ -64,9 +64,9 @@ exports.search = async (req, res, next) => {
 // GET /api/books
 exports.list = async (req, res, next) => {
     try {
-        const { page = 1, limit = 25 } = req.query;
+        const { page = 1, limit = 24 } = req.query;
         const pageNum = parseInt(page) || 1;
-        const limitNum = parseInt(limit) || 25;
+        const limitNum = parseInt(limit) || 24;
         const skip = (pageNum - 1) * limitNum;
 
         // Get total count for pagination

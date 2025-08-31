@@ -10,7 +10,12 @@ import {
     Book as FinishedIcon,
     Book as RequestsIcon,
     Inventory as InventoryIcon,
-    Settings as SettingsIcon
+    Settings as SettingsIcon,
+    People as PeopleIcon,
+    LibraryBooks as LibraryBooksIcon,
+    Book as BookIcon,
+    PendingActions as PendingIcon,
+    Assignment as AssignmentIcon,
 } from '@mui/icons-material';
 
 const drawerWidth = 240;
@@ -35,7 +40,22 @@ export default function LeftDrawer({ user }) {
             to === '/dashboard/want-to-read' ||
             to === '/dashboard/currently-reading' ||
             to === '/dashboard/favorites' ||
-            to === '/dashboard/finished'
+            to === '/dashboard/finished' ||
+            to === '/dashboard/account-settings'
+        ) {
+            return location.pathname === to;
+        }
+
+        // Admin pages: exact match
+        if (
+            to === '/admin' ||
+            to === '/admin/librarian-applications' ||
+            to === '/admin/users' ||
+            to === '/admin/libraries' ||
+            to === '/admin/books' ||
+            to === '/admin/inventory' ||
+            to === '/admin/requests' ||
+            to === '/admin/account-settings'
         ) {
             return location.pathname === to;
         }
@@ -54,50 +74,46 @@ export default function LeftDrawer({ user }) {
         return false;
     };
 
-    const items = [
-        { label: 'Dashboard', to: '/dashboard', show: true, icon: DashboardIcon },
-        { label: 'Want to Read', to: '/dashboard/want-to-read', show: true, icon: WantToReadIcon },
-        { label: 'Currently Reading', to: '/dashboard/currently-reading', show: true, icon: CurrentlyReadingIcon },
-        { label: 'Favorites', to: '/dashboard/favorites', show: true, icon: FavoritesIcon },
-        { label: 'Finished', to: '/dashboard/finished', show: true, icon: FinishedIcon },
-        // Librarian extras (Option B paths)
-        { label: 'Inventory', to: inventoryTo, show: role === 'librarian', icon: InventoryIcon },
-        { label: 'Requested Books', to: requestsTo, show: role === 'librarian', icon: RequestsIcon },
-    ].filter(i => i.show);
+    // Define navigation items based on role
+    const getNavigationItems = () => {
+        if (role === 'admin') {
+            return [
+                { label: 'Dashboard', to: '/admin', icon: DashboardIcon },
+                { label: 'Librarian Applications', to: '/admin/librarian-applications', icon: AssignmentIcon },
+                { label: 'Users', to: '/admin/users', icon: PeopleIcon },
+                { label: 'Libraries', to: '/admin/libraries', icon: LibraryBooksIcon },
+                { label: 'Books', to: '/admin/books', icon: BookIcon },
+                { label: 'Book Inventory', to: '/admin/inventory', icon: InventoryIcon },
+                { label: 'Requests', to: '/admin/requests', icon: PendingIcon },
+                { label: 'Account Settings', to: '/admin/account-settings', icon: SettingsIcon },
+            ];
+        }
 
-    // Admin uses a different layout; hide drawer here if admin
-    if (role === 'admin') {
-        // For admin users, show a simplified drawer with just account settings
-        const adminItems = [
-            { label: 'Account Settings', to: '/admin/account-settings', icon: SettingsIcon },
+        if (role === 'librarian') {
+            return [
+                { label: 'Dashboard', to: '/dashboard', icon: DashboardIcon },
+                { label: 'Want to Read', to: '/dashboard/want-to-read', icon: WantToReadIcon },
+                { label: 'Currently Reading', to: '/dashboard/currently-reading', icon: CurrentlyReadingIcon },
+                { label: 'Favorites', to: '/dashboard/favorites', icon: FavoritesIcon },
+                { label: 'Finished', to: '/dashboard/finished', icon: FinishedIcon },
+                { label: 'Inventory', to: inventoryTo, icon: InventoryIcon },
+                { label: 'Requested Books', to: requestsTo, icon: RequestsIcon },
+                { label: 'Account Settings', to: '/dashboard/account-settings', icon: SettingsIcon },
+            ];
+        }
+
+        // Default for readers
+        return [
+            { label: 'Dashboard', to: '/dashboard', icon: DashboardIcon },
+            { label: 'Want to Read', to: '/dashboard/want-to-read', icon: WantToReadIcon },
+            { label: 'Currently Reading', to: '/dashboard/currently-reading', icon: CurrentlyReadingIcon },
+            { label: 'Favorites', to: '/dashboard/favorites', icon: FavoritesIcon },
+            { label: 'Finished', to: '/dashboard/finished', icon: FinishedIcon },
+            { label: 'Account Settings', to: '/dashboard/account-settings', icon: SettingsIcon },
         ];
+    };
 
-        return (
-            <Drawer
-                variant="permanent"
-                sx={{
-                    width: drawerWidth,
-                    flexShrink: 0,
-                    '& .MuiDrawer-paper': { width: drawerWidth, boxSizing: 'border-box' }
-                }}
-            >
-                <Toolbar />
-                <List>
-                    {adminItems.map(it => (
-                        <ListItemButton
-                            key={it.label}
-                            component={Link}
-                            to={it.to}
-                            selected={location.pathname === it.to}
-                        >
-                            <it.icon sx={{ mr: 2, fontSize: 20 }} />
-                            <ListItemText primary={it.label} />
-                        </ListItemButton>
-                    ))}
-                </List>
-            </Drawer>
-        );
-    }
+    const items = getNavigationItems();
 
     return (
         <Drawer

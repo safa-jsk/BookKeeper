@@ -9,7 +9,8 @@ function DashboardHome({ user }) {
     const theme = useTheme();
     const [data, setData] = useState(null);
     const [myRequests, setMyRequests] = useState([]);
-    const [setLoading] = useState(false);
+    // eslint-disable-next-line
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         const token = localStorage.getItem('token');
@@ -30,6 +31,30 @@ function DashboardHome({ user }) {
             </Typography>
 
             <Grid container spacing={3}>
+                {/* AI Recommendations */}
+                <Grid item xs={12}>
+                    <Paper elevation={2} sx={{ p: 3 }}>
+                        <AIRecommendations
+                            recommendations={data.recommendations || []}
+                            onAddToWantToRead={async (bookId) => {
+                                try {
+                                    setLoading(true);
+                                    await me.addBookToCategory(bookId, 'wantToRead');
+                                    // Refresh dashboard data to show updated want to read list
+                                    const res = await axios.get(`${process.env.REACT_APP_API_URL}/api/dashboard`, {
+                                        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+                                    });
+                                    setData(res.data);
+                                } catch (error) {
+                                    console.error('Error adding book to want to read:', error);
+                                } finally {
+                                    setLoading(false);
+                                }
+                            }}
+                        />
+                    </Paper>
+                </Grid>
+
                 {/* Books Read This Year */}
                 <Grid item xs={12} md={4}>
                     <Paper elevation={2} sx={{ p: 3, textAlign: 'center' }}>
@@ -55,30 +80,6 @@ function DashboardHome({ user }) {
                                 </Box>
                             ))
                         )}
-                    </Paper>
-                </Grid>
-
-                {/* AI Recommendations */}
-                <Grid item xs={12}>
-                    <Paper elevation={2} sx={{ p: 3 }}>
-                        <AIRecommendations
-                            recommendations={data.recommendations || []}
-                            onAddToWantToRead={async (bookId) => {
-                                try {
-                                    setLoading(true);
-                                    await me.addBookToCategory(bookId, 'wantToRead');
-                                    // Refresh dashboard data to show updated want to read list
-                                    const res = await axios.get(`${process.env.REACT_APP_API_URL}/api/dashboard`, {
-                                        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
-                                    });
-                                    setData(res.data);
-                                } catch (error) {
-                                    console.error('Error adding book to want to read:', error);
-                                } finally {
-                                    setLoading(false);
-                                }
-                            }}
-                        />
                     </Paper>
                 </Grid>
 

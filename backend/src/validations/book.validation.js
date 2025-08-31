@@ -4,7 +4,7 @@ exports.searchQuery = Joi.object({
     query: Joi.string().allow('', null),
     filter: Joi.string().valid('none', 'title', 'author', 'genre', 'rating').allow('', null),
     page: Joi.number().integer().min(1).default(1),
-    limit: Joi.number().integer().min(1).max(100).default(25),
+    limit: Joi.number().integer().min(1).max(100).default(24),
 });
 
 exports.bookIdParam = Joi.object({

@@ -1,11 +1,38 @@
-import React from 'react';
-import { Box, Typography, Grid, Chip } from '@mui/material';
+import React, { useState } from 'react';
+import { Box, Typography, Grid, Chip, Snackbar, Alert } from '@mui/material';
 import { AutoAwesome, TrendingUp } from '@mui/icons-material';
 import { useTheme } from '@mui/material/styles';
 import BookCard, { getConfidenceColor } from './BookCard';
 
 const AIRecommendations = ({ recommendations = [], onAddToWantToRead }) => {
     const theme = useTheme();
+    const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
+
+    const handleAddToWantToRead = async (bookId) => {
+        try {
+            // Call the parent callback to handle the API call and state updates
+            if (onAddToWantToRead) {
+                await onAddToWantToRead(bookId);
+            }
+
+            setSnackbar({
+                open: true,
+                message: 'Book added to Want to Read list!',
+                severity: 'success'
+            });
+        } catch (error) {
+            console.error('Error adding book to want to read:', error);
+            setSnackbar({
+                open: true,
+                message: error.response?.data?.message || 'Failed to add book to Want to Read list',
+                severity: 'error'
+            });
+        }
+    };
+
+    const handleCloseSnackbar = () => {
+        setSnackbar({ ...snackbar, open: false });
+    };
 
     if (!recommendations || recommendations.length === 0) {
         return (
@@ -42,12 +69,13 @@ const AIRecommendations = ({ recommendations = [], onAddToWantToRead }) => {
                 {recommendations.slice(0, 5).map((rec) => (
                     <Grid item xs={12} sm={6} md={4} lg={3} xl={2.4} key={rec.dbId}>
                         <BookCard
+                            height={450}
                             book={{
                                 ...rec.book,
                                 confidence: rec.confidence,
                                 confidenceColor: getConfidenceColor(rec.confidence)
                             }}
-                            onWantToRead={onAddToWantToRead}
+                            onWantToRead={handleAddToWantToRead}
                         />
                     </Grid>
                 ))}
@@ -59,6 +87,21 @@ const AIRecommendations = ({ recommendations = [], onAddToWantToRead }) => {
                     Recommendations are based on your reading history and AI analysis
                 </Typography>
             </Box>
+
+            <Snackbar
+                open={snackbar.open}
+                autoHideDuration={3000}
+                onClose={handleCloseSnackbar}
+                anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+            >
+                <Alert
+                    onClose={handleCloseSnackbar}
+                    severity={snackbar.severity}
+                    sx={{ width: '100%' }}
+                >
+                    {snackbar.message}
+                </Alert>
+            </Snackbar>
         </Box>
     );
 };

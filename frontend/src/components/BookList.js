@@ -2,9 +2,10 @@ import React, { useEffect, useState } from 'react';
 import { useTheme } from '@mui/material/styles';
 import axios from 'axios';
 import {
-  Typography, Grid, Box, FormControl, InputLabel, Select, MenuItem, Fade, Pagination
+  Typography, Grid, Box, FormControl, InputLabel, Select, MenuItem, Fade, Pagination, Snackbar, Alert
 } from '@mui/material';
 import BookCard from '../components/BookCard';
+import { me } from '../services/api';
 
 
 function BookList() {
@@ -15,6 +16,7 @@ function BookList() {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('none');
   const [currentPage, setCurrentPage] = useState(1);
+  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
   const [pagination, setPagination] = useState({
     currentPage: 1,
     totalPages: 1,
@@ -27,7 +29,7 @@ function BookList() {
   const fetchBooks = async (query = '', filter = 'none', page = 1) => {
     setLoading(true);
     try {
-      const params = { query, filter, page, limit: 25 };
+      const params = { query, filter, page, limit: 24 };
       const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/books/search`, { params });
 
       if (response.data.books && response.data.pagination) {
@@ -40,7 +42,7 @@ function BookList() {
           currentPage: 1,
           totalPages: 1,
           totalBooks: response.data.length,
-          booksPerPage: 25,
+          booksPerPage: 24,
           hasNextPage: false,
           hasPrevPage: false
         });
@@ -51,7 +53,7 @@ function BookList() {
         currentPage: 1,
         totalPages: 1,
         totalBooks: 0,
-        booksPerPage: 25,
+        booksPerPage: 24,
         hasNextPage: false,
         hasPrevPage: false
       });
@@ -74,7 +76,7 @@ function BookList() {
           currentPage: 1,
           totalPages: 1,
           totalBooks: 0,
-          booksPerPage: 25,
+          booksPerPage: 24,
           hasNextPage: false,
           hasPrevPage: false
         });
@@ -95,6 +97,28 @@ function BookList() {
     e.preventDefault();
     setCurrentPage(1);
     fetchBooks(searchQuery, filter, 1);
+  };
+
+  const handleAddToWantToRead = async (bookId) => {
+    try {
+      await me.addBookToCategory(bookId, 'wantToRead');
+      setSnackbar({
+        open: true,
+        message: 'Book added to Want to Read list!',
+        severity: 'success'
+      });
+    } catch (error) {
+      console.error('Error adding book to want to read:', error);
+      setSnackbar({
+        open: true,
+        message: error.response?.data?.message || 'Failed to add book to Want to Read list',
+        severity: 'error'
+      });
+    }
+  };
+
+  const handleCloseSnackbar = () => {
+    setSnackbar({ ...snackbar, open: false });
   };
 
   return (
@@ -151,7 +175,7 @@ function BookList() {
       {!loading && books.length > 0 && (
         <Box sx={{ textAlign: 'center', mb: 3 }}>
           <Typography variant="body2" color="text.secondary">
-            Showing {((currentPage - 1) * 25) + 1} - {Math.min(currentPage * 25, pagination.totalBooks)} of {pagination.totalBooks} books
+            Showing {((currentPage - 1) * 24) + 1} - {Math.min(currentPage * 24, pagination.totalBooks)} of {pagination.totalBooks} books
           </Typography>
         </Box>
       )}
@@ -171,7 +195,7 @@ function BookList() {
         {books.map((book) => (
           <Fade in={!loading} key={book._id}>
             <Grid item xs={12} sm={6} md={4} lg={3} sx={{ display: 'flex', justifyContent: 'center' }}>
-              <BookCard book={book} />
+              <BookCard book={book} onWantToRead={handleAddToWantToRead} />
             </Grid>
           </Fade>
         ))}
@@ -191,6 +215,21 @@ function BookList() {
           />
         </Box>
       )}
+
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={3000}
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+      >
+        <Alert
+          onClose={handleCloseSnackbar}
+          severity={snackbar.severity}
+          sx={{ width: '100%' }}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 }

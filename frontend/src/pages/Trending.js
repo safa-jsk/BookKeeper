@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Box, Card, CardHeader, CardContent, Grid, Typography, Chip, Stack } from '@mui/material';
+import { Box, Card, CardHeader, CardContent, Grid, Typography, Chip, Stack, Snackbar, Alert } from '@mui/material';
 import BookCard from '../components/BookCard';
-import { books } from '../services/api';
+import { books, me } from '../services/api';
 
 function computeTrendingScore(book) {
     const want = Array.isArray(book.wantToReadBy) ? book.wantToReadBy.length : 0;
@@ -14,6 +14,7 @@ function computeTrendingScore(book) {
 export default function Trending() {
     const [allBooks, setAllBooks] = useState([]);
     const [loading, setLoading] = useState(false);
+    const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
 
     useEffect(() => {
         const load = async () => {
@@ -36,6 +37,28 @@ export default function Trending() {
         load();
     }, []);
 
+    const handleAddToWantToRead = async (bookId) => {
+        try {
+            await me.addBookToCategory(bookId, 'wantToRead');
+            setSnackbar({
+                open: true,
+                message: 'Book added to Want to Read list!',
+                severity: 'success'
+            });
+        } catch (error) {
+            console.error('Error adding book to want to read:', error);
+            setSnackbar({
+                open: true,
+                message: error.response?.data?.message || 'Failed to add book to Want to Read list',
+                severity: 'error'
+            });
+        }
+    };
+
+    const handleCloseSnackbar = () => {
+        setSnackbar({ ...snackbar, open: false });
+    };
+
     const trending = useMemo(() => {
         return allBooks
             .map(b => ({ ...b, _score: computeTrendingScore(b) }))
@@ -57,7 +80,7 @@ export default function Trending() {
                             {trending.map(book => (
                                 <Grid item key={book._id} xs={12} sm={6} md={4} lg={3}>
                                     <Stack spacing={1} alignItems="center">
-                                        <BookCard book={book} />
+                                        <BookCard book={book} onWantToRead={handleAddToWantToRead} />
                                         <Chip size="small" color="secondary" label={`Trending Score: ${book._score}`} />
                                     </Stack>
                                 </Grid>
@@ -66,6 +89,21 @@ export default function Trending() {
                     )}
                 </CardContent>
             </Card>
+
+            <Snackbar
+                open={snackbar.open}
+                autoHideDuration={3000}
+                onClose={handleCloseSnackbar}
+                anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+            >
+                <Alert
+                    onClose={handleCloseSnackbar}
+                    severity={snackbar.severity}
+                    sx={{ width: '100%' }}
+                >
+                    {snackbar.message}
+                </Alert>
+            </Snackbar>
         </Box>
     );
 }

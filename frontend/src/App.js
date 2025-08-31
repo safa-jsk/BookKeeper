@@ -6,7 +6,6 @@ import BookList from './components/BookList';
 import BookDetail from './components/BookDetail';
 import Hakla from './pages/Hakla';
 import Trending from './pages/Trending';
-import AISearch from './pages/AISearch';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import AccountSettings from './pages/AccountSettings';
@@ -32,7 +31,6 @@ import BooksAdmin from './pages/admin/Books';
 import InventoryAdmin from './pages/admin/Inventory';
 import UsersAdmin from './pages/admin/Users';
 import LibrariesAdmin from './pages/admin/Libraries';
-import AdminAccountSettings from './pages/admin/AccountSettings';
 
 import './styles/styles.css';
 import { ThemeProvider } from '@mui/material/styles';
@@ -138,7 +136,6 @@ function App() {
           <Route path="/browse" element={<BookList />} />
           <Route path="/hakla" element={<Hakla />} />
           <Route path="/trending" element={<Trending />} />
-          <Route path="/ai-search" element={<AISearch />} />
           <Route path="/books/:id" element={<BookDetail />} />
           <Route path="/login" element={<Login onLogin={handleLogin} />} />
           <Route path="/register" element={<Register onRegister={handleLogin} />} />
@@ -159,7 +156,7 @@ function App() {
           </Route>
 
           {/* Admin panel */}
-          <Route path="/admin/*" element={<RequireRole roles={['admin']} user={user}><AdminLayout /></RequireRole>}>
+          <Route path="/admin/*" element={<RequireRole roles={['admin']} user={user}><AdminLayout user={user} /></RequireRole>}>
             <Route index element={<AdminHome />} />
             <Route path="librarian-applications" element={<AdminLibrarianApplications />} />
             <Route path="requests" element={<AdminRequests />} />
@@ -167,7 +164,7 @@ function App() {
             <Route path="inventory" element={<InventoryAdmin />} />
             <Route path="users" element={<UsersAdmin />} />
             <Route path="libraries" element={<LibrariesAdmin />} />
-            <Route path="admin-account-settings" element={<AdminAccountSettings user={user} onLogout={handleLogout} />} />
+            <Route path="account-settings" element={<AccountSettings user={user} onLogout={handleLogout} />} />
           </Route>
 
           <Route path="/cart" element={<Cart />} />
