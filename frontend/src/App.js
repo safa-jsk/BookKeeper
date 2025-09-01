@@ -76,6 +76,8 @@ function App() {
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
+    localStorage.removeItem('myLibraryId');
+    localStorage.removeItem('libraryId');
     setUser(null);
     try {
       sessionStorage.setItem('navigating', '1');
