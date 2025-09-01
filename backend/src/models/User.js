@@ -7,7 +7,7 @@ const userSchema = new Schema({
     lastName: { type: String, required: true },
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
-    gender: { type: String, enum: ['Male', 'Female'], required: true },
+    gender: { type: String, enum: ['Male', 'Female', 'Other'], required: true },
     dob: { type: Date, required: true },
     city: { type: String, required: true },
     wantToRead: [{ type: Schema.Types.ObjectId, ref: 'Book' }],

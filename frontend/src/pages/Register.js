@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import { auth } from '../services/api';
 import { TextField, Button, MenuItem, Box, Typography, Alert, Grid } from '@mui/material';
 
 const cities = [
@@ -40,12 +40,18 @@ function Register({ onRegister }) {
             return;
         }
         try {
-            await axios.post(`${process.env.REACT_APP_API_URL}/api/auth/register`, form);
+            console.log('Sending registration request with data:', form);
+            const response = await auth.register(form);
+            console.log('Registration response:', response);
+            setError('');
             setSuccess('Registration successful! You can now log in.');
             setForm({ firstName: '', lastName: '', email: '', password: '', confirmPassword: '', gender: '', dob: '', city: '' });
             if (onRegister) onRegister();
         } catch (err) {
-            setError(err.response?.data?.error || 'Registration failed.');
+            setSuccess('');
+            console.error('Registration error:', err);
+            const errorMessage = err.response?.data?.error || err.response?.data?.message || 'Registration failed.';
+            setError(errorMessage);
         }
     };
 
@@ -79,6 +85,7 @@ function Register({ onRegister }) {
                         >
                             <MenuItem value="Male">Male</MenuItem>
                             <MenuItem value="Female">Female</MenuItem>
+                            <MenuItem value="Other">Other</MenuItem>
                         </TextField>
                     </Grid>
                     <Grid item xs={12} sm={6}>

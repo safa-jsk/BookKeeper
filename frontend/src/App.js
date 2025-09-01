@@ -99,6 +99,22 @@ function App() {
     } catch { }
   };
 
+  const handleRegister = (message) => {
+    // optional: you can show a toast or alert here
+    console.log(message || "Registration successful");
+
+    // clear any auth data just in case
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+
+    // redirect to login page
+    try {
+      sessionStorage.setItem("navigating", "1");
+      Navigate("/");
+    } catch {
+      window.location.assign("/");
+    }
+  };
 
   // Clear navigating flag on load (for SPA navigation tracking)
   useEffect(() => {
@@ -132,13 +148,13 @@ function App() {
       <Router>
         <Navbar user={user} onLogout={handleLogout} />
         <Routes>
-          <Route path="/" element={<Home onLogin={handleLogin} user={user} />} />
+          <Route path="/" element={<Home onLogin={handleLogin} onRegister={handleRegister} user={user} />} />
           <Route path="/browse" element={<BookList />} />
           <Route path="/hakla" element={<Hakla />} />
           <Route path="/trending" element={<Trending />} />
           <Route path="/books/:id" element={<BookDetail />} />
           <Route path="/login" element={<Login onLogin={handleLogin} />} />
-          <Route path="/register" element={<Register onRegister={handleLogin} />} />
+          <Route path="/register" element={<Register onRegister={handleRegister} />} />
           <Route path="/map" element={<Map />} />
 
           {/* Reader/Librarian dashboard */}

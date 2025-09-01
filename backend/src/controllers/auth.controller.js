@@ -14,10 +14,22 @@ exports.register = async (req, res, next) => {
         const user = new User({ firstName, lastName, email, password, gender, dob, city });
         await user.save();
 
-        return res.json({ message: 'User registered successfully!' });
+        return res.status(201).json({ message: 'User registered successfully!' });
     } catch (err) {
         console.error('register error:', err);
-        next(err);
+
+        // Handle specific MongoDB errors
+        if (err.code === 11000) {
+            return res.status(400).json({ error: 'Email already exists.' });
+        }
+
+        // Handle validation errors
+        if (err.name === 'ValidationError') {
+            const validationErrors = Object.values(err.errors).map(e => e.message);
+            return res.status(400).json({ error: validationErrors.join(', ') });
+        }
+
+        res.status(500).json({ error: 'Registration failed. Please try again.' });
     }
 };
 

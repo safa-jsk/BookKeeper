@@ -7,7 +7,7 @@ import { Link } from 'react-router-dom';
 import Login from './Login';
 import Register from './Register';
 
-function Home({ onLogin, user }) {
+function Home({ onLogin, onRegister, user }) {
   const theme = useTheme();
   const [selectedForm, setSelectedForm] = useState('login');
 
@@ -169,7 +169,7 @@ function Home({ onLogin, user }) {
                 {selectedForm === 'login' ? (
                   <Login onLogin={onLogin} />
                 ) : (
-                  <Register onRegister={onLogin} />
+                  <Register onRegister={onRegister} />
                 )}
               </Paper>
             </Grid>
