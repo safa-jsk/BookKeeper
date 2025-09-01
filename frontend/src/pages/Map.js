@@ -1,5 +1,8 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Box, Card, CardHeader, CardContent, Stack, Button, Snackbar, Alert, CircularProgress } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
+import {
+    Box, Typography, Stack, Button, Snackbar, Alert, CircularProgress
+} from '@mui/material';
 
 // Load Google Maps JS API script dynamically
 function loadGoogleMaps(apiKey, onLoad) {
@@ -19,6 +22,7 @@ function loadGoogleMaps(apiKey, onLoad) {
 }
 
 export default function MapPage() {
+    const theme = useTheme();
     const apiKey = process.env.REACT_APP_GOOGLE_MAPS_API_KEY;
 
     const mapRef = useRef(null);
@@ -31,8 +35,9 @@ export default function MapPage() {
     const [snack, setSnack] = useState({ open: false, severity: 'info', message: '' });
     const [position, setPosition] = useState(null);
     const [mapsReady, setMapsReady] = useState(false);
+    const [lastResultsCount, setLastResultsCount] = useState(0);
 
-    const center = useMemo(() => position || { lat: 23.8103, lng: 90.4125 }, [position]); // Dhaka as fallback
+    const center = useMemo(() => position || { lat: 23.8103, lng: 90.4125 }, [position]); // Dhaka fallback
 
     const clearMarkers = () => {
         markersRef.current.forEach(m => m.setMap(null));
@@ -43,7 +48,7 @@ export default function MapPage() {
         if (!window.google || !mapRef.current || mapInstanceRef.current) return;
         const google = window.google;
 
-        const initialCenter = { lat: 23.8103, lng: 90.4125 }; // static fallback; user position handled separately
+        const initialCenter = { lat: 23.8103, lng: 90.4125 };
         mapInstanceRef.current = new google.maps.Map(mapRef.current, {
             center: initialCenter,
             zoom: 6,
@@ -60,13 +65,16 @@ export default function MapPage() {
         if (!google || !mapInstanceRef.current) return;
 
         clearMarkers();
+        setLastResultsCount(0);
 
         const service = new google.maps.places.PlacesService(mapInstanceRef.current);
+        let total = 0;
 
-        let anyResults = false;
         const handleResults = (results, status) => {
             if (status !== google.maps.places.PlacesServiceStatus.OK || !results) return;
-            anyResults = anyResults || results.length > 0;
+            total += results.length;
+            setLastResultsCount(total);
+
             results.forEach(place => {
                 if (!place.geometry || !place.geometry.location) return;
                 const marker = new google.maps.Marker({
@@ -90,12 +98,11 @@ export default function MapPage() {
 
         service.nearbySearch({ ...requestBase, type: 'library' }, handleResults);
         service.nearbySearch({ ...requestBase, type: 'book_store' }, handleResults);
-        // Book cafes (cafes with books)
         service.nearbySearch({ ...requestBase, type: 'cafe', keyword: 'book' }, handleResults);
 
-        // After a short delay, notify if nothing found
+        // If nothing after a short delay, notify
         setTimeout(() => {
-            if (!anyResults) {
+            if (total === 0) {
                 setSnack({ open: true, severity: 'info', message: 'No nearby libraries/bookstores found in this area.' });
             }
         }, 800);
@@ -169,30 +176,73 @@ export default function MapPage() {
     };
 
     return (
-        <Box p={3}>
-            <Card>
-                <CardHeader title="Map" subheader="Your location and nearby libraries/bookstores" />
-                <CardContent>
-                    <Box sx={{ position: 'relative', height: 520, borderRadius: 2, overflow: 'hidden' }}>
-                        <div ref={mapRef} style={{ width: '100%', height: '100%' }} />
-                        {loading && (
-                            <Stack alignItems="center" justifyContent="center" sx={{ position: 'absolute', inset: 0, background: '#fff8' }}>
-                                <CircularProgress />
-                            </Stack>
-                        )}
-                    </Box>
-                    <Stack direction="row" spacing={1} sx={{ mt: 2 }}>
-                        <Button variant="outlined" onClick={recenter}>Re-center</Button>
-                        <Button variant="contained" onClick={searchNearby}>Refresh Nearby</Button>
-                    </Stack>
-                </CardContent>
-            </Card>
+        <Box sx={{ p: 3, width: '100%' }}>
+            {/* Header: match BookList */}
+            <Typography
+                variant="h4"
+                sx={{
+                    color: theme.palette.primary.main,
+                    fontWeight: 700,
+                    letterSpacing: 2,
+                    textAlign: 'center',
+                    mb: 4
+                }}
+            >
+                Nearby Libraries & Bookstores
+            </Typography>
 
-            <Snackbar open={snack.open} autoHideDuration={3200} onClose={() => setSnack(s => ({ ...s, open: false }))}>
-                <Alert severity={snack.severity} onClose={() => setSnack(s => ({ ...s, open: false }))}>{snack.message}</Alert>
+            {/* Results Info: match BookList style */}
+            {!loading && (
+                <Box sx={{ textAlign: 'center', mb: 3 }}>
+                    <Typography variant="body2" color="text.secondary">
+                        {lastResultsCount > 0
+                            ? `Showing ${lastResultsCount} nearby places`
+                            : 'No places found near this area'}
+                    </Typography>
+                </Box>
+            )}
+
+            {/* Map box: styled like inputs/cards elsewhere */}
+            <Box
+                sx={{
+                    position: 'relative',
+                    width: '100%',
+                    height: 720,
+                    borderRadius: 2,
+                    overflow: 'hidden',
+                    bgcolor: theme.palette.background.paper,
+                    border: `1.5px solid ${theme.palette.info.main}`,
+                    boxShadow: 2
+                }}
+            >
+                <div ref={mapRef} style={{ width: '100%', height: '100%' }} />
+                {loading && (
+                    <Stack alignItems="center" justifyContent="center" sx={{ position: 'absolute', inset: 0, background: '#fff8' }}>
+                        <CircularProgress />
+                    </Stack>
+                )}
+            </Box>
+
+            {/* Actions row: centered like BookList controls */}
+            <Stack
+                direction={{ xs: 'column', sm: 'row' }}
+                spacing={2}
+                sx={{ mt: 2, justifyContent: 'center', alignItems: 'center' }}
+            >
+                <Button variant="outlined" onClick={recenter}>Re-center</Button>
+                <Button variant="contained" onClick={searchNearby}>Refresh Nearby</Button>
+            </Stack>
+
+            <Snackbar
+                open={snack.open}
+                autoHideDuration={3200}
+                onClose={() => setSnack(s => ({ ...s, open: false }))}
+                anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+            >
+                <Alert severity={snack.severity} onClose={() => setSnack(s => ({ ...s, open: false }))}>
+                    {snack.message}
+                </Alert>
             </Snackbar>
         </Box>
     );
 }
-
-
