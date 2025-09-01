@@ -29,10 +29,14 @@ export default function Cart() {
     // expand per-book libraries table
     const [openLibraries, setOpenLibraries] = useState({}); // bookId -> bool
 
-    // checkout dialog
+    // per-book assignment for split checkout: { [bookId]: libraryId }
+    const [assigned, setAssigned] = useState({});
+
+    // checkout dialog (single-library flow)
     const [checkoutOpen, setCheckoutOpen] = useState(false);
     const [chosenLibrary, setChosenLibrary] = useState('');
     const [submitting, setSubmitting] = useState(false);
+    const [submittingSplit, setSubmittingSplit] = useState(false);
 
     const load = async () => {
         setLoading(true);
@@ -40,6 +44,13 @@ export default function Cart() {
             const { data } = await getCart();
             setCart(data.cart);
             setAvailability(data.availability || {});
+            // prune assignments for books that no longer exist in cart
+            const ids = new Set((data.cart?.items || []).map(i => i.book._id));
+            setAssigned(prev => {
+                const next = { ...prev };
+                Object.keys(next).forEach(k => { if (!ids.has(k)) delete next[k]; });
+                return next;
+            });
         } finally {
             setLoading(false);
         }
@@ -69,13 +80,20 @@ export default function Cart() {
         }
     };
 
+    const assignLibrary = (bookId, libraryId) => {
+        setAssigned(s => ({ ...s, [bookId]: libraryId }));
+        setSnack({ open: true, severity: 'success', message: 'Assigned library for this book.' });
+    };
+    const clearAssignment = (bookId) => setAssigned(s => {
+        const n = { ...s }; delete n[bookId]; return n;
+    });
+
     // Build union of libraries present anywhere
     const allLibraryOptions = useMemo(() => {
         const map = {};
         Object.values(availability).forEach(list => {
             (list || []).forEach(lib => { map[lib.libraryId] = lib; });
         });
-        // sort by name
         return Object.values(map).sort((a, b) => (a.libraryName || '').localeCompare(b.libraryName || ''));
     }, [availability]);
 
@@ -94,7 +112,6 @@ export default function Cart() {
         });
         const totalItems = (cart?.items || []).length;
         const eligible = allLibraryOptions.filter(lib => (byLib[lib.libraryId] || 0) === totalItems);
-        // Prefer libraries with higher total stock across the items (tie-breaker)
         const score = (lib) => (cart?.items || []).reduce((s, it) => {
             const rec = (availability[it.book._id] || []).find(x => x.libraryId === lib.libraryId);
             return s + (rec ? Number(rec.stock) || 0 : 0);
@@ -102,43 +119,42 @@ export default function Cart() {
         return eligible.sort((a, b) => score(b) - score(a));
     }, [cart, availability, allLibraryOptions]);
 
-    // Validate a library against the full cart
-    const canFulfillAll = (libraryId) => {
-        return (cart?.items || []).every(it => {
-            const rec = (availability[it.book._id] || []).find(l => l.libraryId === libraryId);
-            return rec && (Number(rec.stock) || 0) >= (Number(it.quantity) || 0);
-        });
-    };
-
     const onCheckout = () => {
         setChosenLibrary('');
         setCheckoutOpen(true);
     };
 
+    // PARTIAL checkout to a single library (fulfillable subset only)
     const confirmRequest = async () => {
         if (!chosenLibrary) return;
-        // Pre-check fulfillment
-        if (!canFulfillAll(chosenLibrary)) {
-            const insufficient = (cart?.items || []).filter(it => {
-                const rec = (availability[it.book._id] || []).find(l => l.libraryId === chosenLibrary);
-                return !rec || (Number(rec.stock) || 0) < (Number(it.quantity) || 0);
-            }).map(it => it.book.title);
-            setSnack({
-                open: true,
-                severity: 'error',
-                message: `Selected library cannot fulfill: ${insufficient.join(', ')}`
-            });
+
+        const items = (cart?.items || []);
+        // split: fulfillable vs not
+        const fulfillable = items.filter(it => {
+            const rec = (availability[it.book._id] || []).find(l => l.libraryId === chosenLibrary);
+            return rec && (Number(rec.stock) || 0) >= (Number(it.quantity) || 0);
+        });
+        const skipped = items.filter(it => !fulfillable.includes(it));
+
+        if (fulfillable.length === 0) {
+            setSnack({ open: true, severity: 'error', message: 'No items are in stock at the selected library.' });
             return;
         }
 
         setSubmitting(true);
         try {
-            const items = (cart?.items || []).map(it => ({ bookId: it.book._id || it.book, quantity: it.quantity }));
-            await createRequest(chosenLibrary, items);
-            setSnack({ open: true, severity: 'success', message: 'Request sent. You’ll be notified after approval.' });
-            setCheckoutOpen(false);
-            // optional: reload to clear cart server-side if your API does that
+            const payload = fulfillable.map(it => ({ bookId: it.book._id || it.book, quantity: it.quantity }));
+            await createRequest(chosenLibrary, payload);
+
+            // remove only the requested ones from cart
+            await Promise.all(fulfillable.map(it => removeCartItem(it.book._id || it.book)));
             await load();
+
+            const msg = skipped.length > 0
+                ? `Request sent for ${fulfillable.length} item(s). ${skipped.length} item(s) not available at this library.`
+                : 'Request sent for all items.';
+            setSnack({ open: true, severity: skipped.length ? 'warning' : 'success', message: msg });
+            setCheckoutOpen(false);
         } catch (e) {
             const msg = e?.response?.data?.message || 'Failed to place request.';
             setSnack({ open: true, severity: 'error', message: msg });
@@ -147,13 +163,89 @@ export default function Cart() {
         }
     };
 
+    // QUICK single-book request from a specific library row
+    const requestSingle = async ({ libraryId, bookId, quantity }) => {
+        try {
+            await createRequest(libraryId, [{ bookId, quantity }]);
+            await removeCartItem(bookId);
+            await load();
+            setSnack({ open: true, severity: 'success', message: 'Request sent for 1 item.' });
+        } catch (e) {
+            const msg = e?.response?.data?.message || 'Failed to place request.';
+            setSnack({ open: true, severity: 'error', message: msg });
+        }
+    };
+
+    // SPLIT checkout: send requests grouped by assigned library
+    const confirmSplitRequests = async () => {
+        const items = cart?.items || [];
+        // build library -> items[]
+        const byLib = {};
+        const skipped = [];
+
+        for (const it of items) {
+            const bookId = it.book._id;
+            const libId = assigned[bookId];
+            if (!libId) continue; // not assigned => ignore
+            const rec = (availability[bookId] || []).find(l => l.libraryId === libId);
+            if (rec && (Number(rec.stock) || 0) >= (Number(it.quantity) || 0)) {
+                (byLib[libId] ||= []).push({ bookId, quantity: it.quantity });
+            } else {
+                skipped.push(it.book.title);
+            }
+        }
+
+        const libIds = Object.keys(byLib);
+        if (libIds.length === 0) {
+            setSnack({ open: true, severity: 'warning', message: 'No assigned items are currently fulfillable.' });
+            return;
+        }
+
+        setSubmittingSplit(true);
+        const successes = [];
+        const failures = [];
+
+        for (const libId of libIds) {
+            try {
+                await createRequest(libId, byLib[libId]);
+                successes.push(libId);
+            } catch (e) {
+                failures.push(libId);
+            }
+        }
+
+        // remove requested items that succeeded
+        if (successes.length) {
+            const requestedBookIds = new Set(
+                successes.flatMap(id => byLib[id].map(i => i.bookId))
+            );
+            await Promise.all(
+                Array.from(requestedBookIds).map(bid => removeCartItem(bid))
+            );
+        }
+
+        await load();
+
+        let message = '';
+        if (successes.length) message += `Requests sent to ${successes.length} librar${successes.length === 1 ? 'y' : 'ies'}. `;
+        if (failures.length) message += `${failures.length} request${failures.length === 1 ? '' : 's'} failed. `;
+        if (skipped.length) message += `Skipped (insufficient stock): ${skipped.join(', ')}`;
+
+        setSnack({
+            open: true,
+            severity: failures.length ? 'warning' : 'success',
+            message: message || 'Done.'
+        });
+
+        setSubmittingSplit(false);
+    };
+
     // Render helpers
     const availabilityFor = (bookId) => (availability[bookId] || []).slice().sort((a, b) => (b.stock || 0) - (a.stock || 0));
     const libraryCountFor = (bookId) => (availability[bookId] || []).length;
     const bestStockFor = (bookId) => Math.max(0, ...availabilityFor(bookId).map(l => Number(l.stock) || 0));
 
     if (!cart) return null;
-
     const items = cart.items || [];
 
     return (
@@ -163,13 +255,26 @@ export default function Cart() {
                     title="Your Cart"
                     subheader={loading ? 'Loading…' : `${items.length} item${items.length === 1 ? '' : 's'}`}
                     action={
-                        <Tooltip title="Refresh">
-                            <span>
-                                <Button variant="outlined" startIcon={<RefreshIcon />} onClick={load} disabled={loading}>
-                                    Refresh
-                                </Button>
-                            </span>
-                        </Tooltip>
+                        <Stack direction="row" spacing={1}>
+                            <Tooltip title="Split checkout: send to assigned libraries">
+                                <span>
+                                    <Button
+                                        variant="outlined"
+                                        onClick={confirmSplitRequests}
+                                        disabled={submittingSplit || Object.keys(assigned).length === 0}
+                                    >
+                                        Send Assigned
+                                    </Button>
+                                </span>
+                            </Tooltip>
+                            <Tooltip title="Refresh">
+                                <span>
+                                    <Button variant="outlined" startIcon={<RefreshIcon />} onClick={load} disabled={loading}>
+                                        Refresh
+                                    </Button>
+                                </span>
+                            </Tooltip>
+                        </Stack>
                     }
                 />
                 <CardContent>
@@ -190,11 +295,11 @@ export default function Cart() {
                                     <TableHead>
                                         <TableRow>
                                             <TableCell width="4%"></TableCell>
-                                            <TableCell width="36%">Book</TableCell>
+                                            <TableCell width="30%">Book</TableCell>
                                             <TableCell width="16%">Author</TableCell>
-                                            <TableCell width="12%">Genre</TableCell>
+                                            <TableCell width="10%">Genre</TableCell>
                                             <TableCell width="12%">Quantity</TableCell>
-                                            <TableCell width="12%">Availability</TableCell>
+                                            <TableCell width="20%">Availability</TableCell>
                                             <TableCell width="8%" align="right">Actions</TableCell>
                                         </TableRow>
                                     </TableHead>
@@ -205,6 +310,8 @@ export default function Cart() {
                                             const libs = availabilityFor(b._id);
                                             const libCount = libraryCountFor(b._id);
                                             const best = bestStockFor(b._id);
+                                            const assignedLibId = assigned[b._id];
+                                            const assignedLib = libs.find(l => l.libraryId === assignedLibId);
 
                                             const striped = idx % 2 === 0 ? alpha(theme.palette.primary.main, 0.03) : 'transparent';
 
@@ -254,9 +361,19 @@ export default function Cart() {
                                                             </Stack>
                                                         </TableCell>
                                                         <TableCell>
-                                                            <Stack direction="row" spacing={1} alignItems="center">
+                                                            <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap">
                                                                 <Chip size="small" label={`${libCount} librar${libCount === 1 ? 'y' : 'ies'}`} />
                                                                 <Chip size="small" label={`Best: ${best}`} />
+                                                                {assignedLib ? (
+                                                                    <Chip
+                                                                        size="small"
+                                                                        color="success"
+                                                                        label={`Assigned: ${assignedLib.libraryName}`}
+                                                                        onDelete={() => clearAssignment(b._id)}
+                                                                    />
+                                                                ) : (
+                                                                    <Chip size="small" label="No assignment" variant="outlined" />
+                                                                )}
                                                             </Stack>
                                                         </TableCell>
                                                         <TableCell align="right" sx={{ whiteSpace: 'nowrap' }}>
@@ -275,11 +392,9 @@ export default function Cart() {
                                                         <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={7}>
                                                             <Collapse in={isOpen} timeout="auto" unmountOnExit>
                                                                 <Box sx={{ my: 2, mx: 1 }}>
-                                                                    <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1 }}>
-                                                                        <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
-                                                                            Libraries with “{b.title}”
-                                                                        </Typography>
-                                                                    </Stack>
+                                                                    <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 1 }}>
+                                                                        Libraries with “{b.title}”
+                                                                    </Typography>
                                                                     <TableContainer component={Paper} variant="outlined" sx={{ borderRadius: 2 }}>
                                                                         <Table size="small" aria-label={`Libraries table for ${b.title}`}>
                                                                             <TableHead>
@@ -288,7 +403,7 @@ export default function Cart() {
                                                                                     <TableCell width="34%">Address</TableCell>
                                                                                     <TableCell width="12%">Stock</TableCell>
                                                                                     <TableCell width="10%">Price</TableCell>
-                                                                                    <TableCell width="12%" align="right">Action</TableCell>
+                                                                                    <TableCell width="12%" align="right">Actions</TableCell>
                                                                                 </TableRow>
                                                                             </TableHead>
                                                                             <TableBody>
@@ -298,30 +413,43 @@ export default function Cart() {
                                                                                             Not available in any library
                                                                                         </TableCell>
                                                                                     </TableRow>
-                                                                                ) : libs.map(lib => (
-                                                                                    <TableRow key={lib.libraryId} hover>
-                                                                                        <TableCell sx={{ wordBreak: 'break-word' }}>{lib.libraryName || '—'}</TableCell>
-                                                                                        <TableCell sx={{ wordBreak: 'break-word' }}>{lib.address || '—'}</TableCell>
-                                                                                        <TableCell>{lib.stock ?? 0}</TableCell>
-                                                                                        <TableCell>{lib.price != null ? lib.price : '—'}</TableCell>
-                                                                                        <TableCell align="right">
-                                                                                            <Button
-                                                                                                size="small"
-                                                                                                variant="outlined"
-                                                                                                onClick={() => {
-                                                                                                    if ((Number(lib.stock) || 0) < (Number(it.quantity) || 0)) {
-                                                                                                        setSnack({ open: true, severity: 'error', message: `Only ${lib.stock} in stock at ${lib.libraryName}` });
-                                                                                                        return;
-                                                                                                    }
-                                                                                                    setChosenLibrary(lib.libraryId);
-                                                                                                    setCheckoutOpen(true);
-                                                                                                }}
-                                                                                            >
-                                                                                                Request Book
-                                                                                            </Button>
-                                                                                        </TableCell>
-                                                                                    </TableRow>
-                                                                                ))}
+                                                                                ) : libs.map(lib => {
+                                                                                    const can = (Number(lib.stock) || 0) >= (Number(it.quantity) || 0);
+                                                                                    const isAssigned = assignedLibId === lib.libraryId;
+                                                                                    return (
+                                                                                        <TableRow key={lib.libraryId} hover>
+                                                                                            <TableCell sx={{ wordBreak: 'break-word' }}>{lib.libraryName || '—'}</TableCell>
+                                                                                            <TableCell sx={{ wordBreak: 'break-word' }}>{lib.address || '—'}</TableCell>
+                                                                                            <TableCell>{lib.stock ?? 0}</TableCell>
+                                                                                            <TableCell>{lib.price != null ? lib.price : '—'}</TableCell>
+                                                                                            <TableCell align="right">
+                                                                                                <Stack direction="row" spacing={1} justifyContent="flex-end">
+                                                                                                    <Button
+                                                                                                        size="small"
+                                                                                                        variant={isAssigned ? 'contained' : 'outlined'}
+                                                                                                        color={isAssigned ? 'success' : 'primary'}
+                                                                                                        onClick={() => assignLibrary(b._id, lib.libraryId)}
+                                                                                                    >
+                                                                                                        {isAssigned ? 'Assigned' : 'Assign'}
+                                                                                                    </Button>
+                                                                                                    <Button
+                                                                                                        size="small"
+                                                                                                        variant="outlined"
+                                                                                                        onClick={() => {
+                                                                                                            if (!can) {
+                                                                                                                setSnack({ open: true, severity: 'error', message: `Only ${lib.stock} in stock at ${lib.libraryName}` });
+                                                                                                                return;
+                                                                                                            }
+                                                                                                            requestSingle({ libraryId: lib.libraryId, bookId: b._id, quantity: it.quantity });
+                                                                                                        }}
+                                                                                                    >
+                                                                                                        Request Book
+                                                                                                    </Button>
+                                                                                                </Stack>
+                                                                                            </TableCell>
+                                                                                        </TableRow>
+                                                                                    );
+                                                                                })}
                                                                             </TableBody>
                                                                         </Table>
                                                                     </TableContainer>
@@ -337,14 +465,14 @@ export default function Cart() {
                             </TableContainer>
 
                             {/* Global checkout */}
-                            <Stack direction="row" justifyContent="flex-end">
+                            <Stack direction="row" justifyContent="flex-end" spacing={1}>
                                 <Button
                                     onClick={onCheckout}
                                     variant="contained"
                                     startIcon={<ShoppingCartCheckoutIcon />}
                                     disabled={items.length === 0}
                                 >
-                                    Request from a Library
+                                    Request from a Single Library
                                 </Button>
                             </Stack>
                         </React.Fragment>
@@ -352,7 +480,7 @@ export default function Cart() {
                 </CardContent>
             </Card>
 
-            {/* Checkout dialog */}
+            {/* Single-library checkout dialog (partial allowed) */}
             <Dialog open={checkoutOpen} onClose={() => setCheckoutOpen(false)} fullWidth maxWidth="sm">
                 <DialogTitle>Select a Library</DialogTitle>
                 <DialogContent dividers>
@@ -361,9 +489,8 @@ export default function Cart() {
                     ) : (
                         <Stack spacing={2}>
                             {eligibleLibraryOptions.length === 0 && (
-                                <Alert severity="warning">
-                                    No single library can fulfill all items at the requested quantities.
-                                    You can still send a request to any library below, but it may be rejected.
+                                <Alert severity="info">
+                                    If the selected library lacks some items, we’ll send a request for the items it can fulfill and leave the others in your cart.
                                 </Alert>
                             )}
                             <TextField
@@ -373,8 +500,8 @@ export default function Cart() {
                                 value={chosenLibrary}
                                 onChange={e => setChosenLibrary(e.target.value)}
                                 helperText={eligibleLibraryOptions.length > 0
-                                    ? 'Only libraries that can fulfill all items are shown first.'
-                                    : 'Showing all libraries with any of your items.'}
+                                    ? 'Libraries that can fulfill everything are shown first.'
+                                    : 'Pick any library; only available items will be requested.'}
                             >
                                 {(eligibleLibraryOptions.length > 0 ? eligibleLibraryOptions : allLibraryOptions).map(lib => (
                                     <MenuItem key={lib.libraryId} value={lib.libraryId}>

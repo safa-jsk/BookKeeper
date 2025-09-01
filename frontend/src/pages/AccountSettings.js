@@ -2,14 +2,13 @@
 import React, { useEffect, useState } from 'react';
 import {
     Box, Grid, Card, CardContent, CardHeader, TextField, Button, MenuItem,
-    Typography, Snackbar, Alert, Avatar, Divider, Stack, Skeleton, Chip, Toolbar
+    Typography, Snackbar, Alert, Avatar, Divider, Stack, Skeleton, Chip
 } from '@mui/material';
 import { useTheme, alpha } from '@mui/material/styles';
 import { useLocation } from 'react-router-dom';
 import axios from 'axios';
 import dayjs from 'dayjs';
 import LibraryApplicationDialog from '../components/LibraryApplicationDialog';
-import LeftDrawer from '../components/LeftDrawer';
 import { THEMES, THEME_LABELS } from '../theme';
 
 // Icons
@@ -180,19 +179,11 @@ function AccountSettings({ user, onLogout }) {
     if (loading) {
         if (isAdminContext) {
             return (
-                <Box sx={{ display: 'flex' }}>
-                    <LeftDrawer user={me || user} />
-                    <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
-                        <Toolbar />
-                        <Grid container spacing={3}>
-                            <Grid item xs={12} md={6}>
-                                <Skeleton variant="rectangular" height={200} />
-                            </Grid>
-                            <Grid item xs={12} md={6}>
-                                <Skeleton variant="rectangular" height={200} />
-                            </Grid>
-                        </Grid>
-                    </Box>
+                <Box sx={{ pb: 6, px: { xs: 2, md: 3 } }}>
+                    <Grid container spacing={3}>
+                        <Grid item xs={12} md={6}><Skeleton variant="rectangular" height={200} /></Grid>
+                        <Grid item xs={12} md={6}><Skeleton variant="rectangular" height={200} /></Grid>
+                    </Grid>
                 </Box>
             );
         }
@@ -466,17 +457,10 @@ function AccountSettings({ user, onLogout }) {
 
     // Return with appropriate layout wrapper
     if (isAdminContext) {
-        return (
-            <Box sx={{ display: 'flex' }}>
-                <LeftDrawer user={me || user} />
-                <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
-                    <Toolbar />
-                    {mainContent}
-                </Box>
-            </Box>
-        );
+        // AdminLayout already wraps this route with LeftDrawer + Toolbar
+        return mainContent;
     }
-
+    // non-admin route: keep your current behavior (content-only or wrap in your dashboard layout)
     return mainContent;
 }
 
