@@ -140,4 +140,15 @@ export const THEMES = {
     darkMode: { primary: '#121212', accent: '#BB86FC', brown: '#03DAC6', beige: '#1F1F1F', light: '#303030' },
 };
 
+export const THEME_LABELS = {
+    scholarly: 'Scholarly Vibes',
+    modernElegance: 'Modern Elegance',
+    coastalCalm: 'Coastal Calm',
+    rusticCharm: 'Rustic Charm',
+    blueSerenity: 'Blue Serenity',
+    redPassion: 'Red Passion',
+    blackWhite: 'Black & White',
+    darkMode: 'Dark Mode',
+};
+
 export default buildTheme(paletteDefault);

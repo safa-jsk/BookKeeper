@@ -10,6 +10,7 @@ import axios from 'axios';
 import dayjs from 'dayjs';
 import LibraryApplicationDialog from '../components/LibraryApplicationDialog';
 import LeftDrawer from '../components/LeftDrawer';
+import { THEMES, THEME_LABELS } from '../theme';
 
 // Icons
 import SaveIcon from '@mui/icons-material/Save';
@@ -48,6 +49,23 @@ function AccountSettings({ user, onLogout }) {
         background: alpha(theme.palette.background.paper, 0.6),
         boxShadow: `0 8px 30px ${alpha('#000', 0.08)}`,
         backdropFilter: 'blur(8px)',
+    };
+
+    const applyTheme = async (key) => {
+        try {
+            await axios.put(`${API}/api/user/me`, { theme: key }, authHeader());
+        } catch { /* non-blocking */ }
+
+        // update local state & storage
+        setProfile((p) => ({ ...p, theme: key }));
+        try {
+            const saved = JSON.parse(localStorage.getItem('user') || '{}');
+            saved.theme = key;
+            localStorage.setItem('user', JSON.stringify(saved));
+        } catch { }
+
+        window.dispatchEvent(new Event('user-theme-updated'));
+        setSnack({ open: true, severity: 'success', message: `${THEME_LABELS[key]} applied.` });
     };
 
     // Determine if we're in admin context
@@ -317,24 +335,6 @@ function AccountSettings({ user, onLogout }) {
                                     <Grid item xs={12} sm={6}>
                                         <TextField label="Email" fullWidth disabled value={profile.email} />
                                     </Grid>
-                                    <Grid item xs={12} sm={6}>
-                                        <TextField
-                                            select
-                                            label="Theme"
-                                            fullWidth
-                                            value={profile.theme}
-                                            onChange={e => setProfile({ ...profile, theme: e.target.value })}
-                                        >
-                                            <MenuItem value="scholarly">Scholarly Vibes — #4B3D2D</MenuItem>
-                                            <MenuItem value="modernElegance">Modern Elegance — #3A2C2F</MenuItem>
-                                            <MenuItem value="coastalCalm">Coastal Calm — #2E4053</MenuItem>
-                                            <MenuItem value="rusticCharm">Rustic Charm — #4A3C2A</MenuItem>
-                                            <MenuItem value="blueSerenity">Blue Serenity — #2C3E50</MenuItem>
-                                            <MenuItem value="redPassion">Red Passion — #C0392B</MenuItem>
-                                            <MenuItem value="blackWhite">Black & White — #000000</MenuItem>
-                                            <MenuItem value="darkMode">Dark Mode — #121212</MenuItem>
-                                        </TextField>
-                                    </Grid>
                                 </Grid>
 
                                 <Stack direction="row" spacing={1} sx={{ mt: 2 }}>
@@ -346,6 +346,49 @@ function AccountSettings({ user, onLogout }) {
                         </CardContent>
                     </Card>
                 </Grid>
+
+                <Card sx={{ ...glass, mb: 3 }}>
+                    <CardHeader title="Themes" subheader="Pick a look." />
+                    <CardContent>
+                        <Grid container spacing={2}>
+                            {Object.entries(THEMES).map(([key, pal]) => {
+                                const selected = profile.theme === key;
+                                return (
+                                    <Grid item xs={6} sm={4} md={6} key={key}>
+                                        <Stack alignItems="center" spacing={1}>
+                                            <Box
+                                                role="button"
+                                                tabIndex={0}
+                                                onClick={() => applyTheme(key)}
+                                                onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && applyTheme(key)}
+                                                aria-label={`Apply ${THEME_LABELS[key]} theme`}
+                                                sx={{
+                                                    width: 72,
+                                                    height: 72,
+                                                    borderRadius: '50%',
+                                                    background: `linear-gradient(90deg, ${pal.primary} 50%, ${pal.accent} 50%)`,
+                                                    border: '2px solid',
+                                                    borderColor: selected ? 'primary.main' : 'divider',
+                                                    boxShadow: selected ? `0 0 0 4px ${alpha(theme.palette.primary.main, 0.18)}` : 'none',
+                                                    cursor: 'pointer',
+                                                    transition: 'transform .15s ease, box-shadow .15s ease, border-color .15s ease',
+                                                    '&:hover': { transform: 'scale(1.05)' },
+                                                    outline: 'none',
+                                                }}
+                                            />
+                                            <Typography
+                                                variant="body2"
+                                                sx={{ fontWeight: selected ? 700 : 500, textAlign: 'center' }}
+                                            >
+                                                {THEME_LABELS[key]}
+                                            </Typography>
+                                        </Stack>
+                                    </Grid>
+                                );
+                            })}
+                        </Grid>
+                    </CardContent>
+                </Card>
 
                 {/* Security + Danger Zone */}
                 <Grid item xs={12} md={5}>

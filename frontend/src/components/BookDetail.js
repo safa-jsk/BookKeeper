@@ -46,10 +46,10 @@ function getUserFullNameFromToken() {
     const token = localStorage.getItem('token');
     if (!token) return '';
     const payload = JSON.parse(atob(token.split('.')[1] || ''));
-    const u = payload.user || payload;
-    const first = u.firstName || u.given_name || '';
-    const last = u.lastName || u.family_name || '';
-    return [first, last].filter(Boolean).join(' ') || u.name || '';
+    const user = payload.user || payload;
+    const first = user.firstName || user.given_name || '';
+    const last = user.lastName || user.family_name || '';
+    return [first, last].filter(Boolean).join(' ') || user.name || '';
   } catch {
     return '';
   }
@@ -71,9 +71,9 @@ function BookDetail() {
   const isLoggedIn = useMemo(() => Boolean(localStorage.getItem('token')), []);
 
   useEffect(() => {
-    const full = getUserFullNameFromToken();
-    setUserFullName(full);
-    setNewReview(prev => ({ ...prev, user: full || prev.user }));
+    const userFullName = getUserFullNameFromToken();
+    setUserFullName(userFullName);
+    setNewReview(prev => ({ ...prev, user: userFullName || prev.user }));
   }, []);
 
   useEffect(() => {
@@ -255,9 +255,8 @@ function BookDetail() {
                     label="Your Name"
                     fullWidth
                     required
-                    value={userFullName || ''}
+                    value={userFullName || 'Name taken from account'}
                     InputProps={{ readOnly: true }}
-                    helperText="From your account"
                   />
                 </Grid>
                 <Grid item xs={12} sm={5}>
