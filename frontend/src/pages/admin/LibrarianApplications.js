@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import {
-    Box, Card, CardHeader, CardContent, Tabs, Tab, TextField, Stack, IconButton, Button,
-    Dialog, DialogTitle, DialogContent, DialogActions, Typography, Chip, Snackbar, Alert, Tooltip, Divider
+    Box, Stack, Typography, Button, Snackbar, Alert, Dialog, DialogTitle, DialogContent,
+    DialogActions, TextField, Tabs, Tab, Chip, Tooltip, Divider, Card, CardContent, Fade
 } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import CheckIcon from '@mui/icons-material/Check';
@@ -18,7 +18,6 @@ export default function AdminLibrarianApplications() {
     const [q, setQ] = useState('');
     const [loading, setLoading] = useState(false);
     const [snack, setSnack] = useState({ open: false, severity: 'success', message: '' });
-
     const [confirm, setConfirm] = useState({ open: false, id: null, action: null, note: '' });
 
     const load = useCallback(async () => {
@@ -26,7 +25,7 @@ export default function AdminLibrarianApplications() {
         try {
             const { data } = await admin.listLibrarianApps(STATUS[tab]);
             setRows(data || []);
-        } catch (e) {
+        } catch {
             setSnack({ open: true, severity: 'error', message: 'Failed to load applications' });
         } finally {
             setLoading(false);
@@ -40,12 +39,13 @@ export default function AdminLibrarianApplications() {
         if (!needle) return rows;
         return rows.filter(r => {
             const name = `${r?.applicant?.firstName || ''} ${r?.applicant?.lastName || ''}`.toLowerCase();
+            const phone = (typeof r.ownerPhone === 'string' ? r.ownerPhone : '').toLowerCase();
             return (
-                r.libraryName?.toLowerCase().includes(needle) ||
+                (r.libraryName || '').toLowerCase().includes(needle) ||
                 name.includes(needle) ||
-                r?.applicant?.email?.toLowerCase().includes(needle) ||
-                r.city?.toLowerCase().includes(needle) ||
-                r.ownerPhone?.toLowerCase?.().includes(needle)
+                (r?.applicant?.email || '').toLowerCase().includes(needle) ||
+                (r.city || '').toLowerCase().includes(needle) ||
+                phone.includes(needle)
             );
         });
     }, [rows, q]);
@@ -65,87 +65,119 @@ export default function AdminLibrarianApplications() {
         }
     };
 
+    const chipColor = (s) => (s === 'pending' ? 'warning' : s === 'approved' ? 'success' : 'default');
+
     return (
-        <Box p={3}>
-            <Card>
-                <CardHeader
-                    title="Librarian Applications"
-                    subheader="Review and approve/reject librarian applications"
-                    action={
-                        <Tooltip title="Refresh">
-                            <span>
-                                <IconButton onClick={load} disabled={loading}>
-                                    <RefreshIcon />
-                                </IconButton>
-                            </span>
-                        </Tooltip>
-                    }
+        <Box sx={{ p: 3, maxWidth: '1200px', mx: 'auto' }}>
+            {/* Header row */}
+            <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 2 }}>
+                <Typography
+                    variant="h4"
+                    sx={{ color: 'primary.main', fontWeight: 700, letterSpacing: 2 }}
+                >
+                    Librarian Applications
+                </Typography>
+                <Tooltip title="Refresh">
+                    <span>
+                        <Button variant="outlined" startIcon={<RefreshIcon />} onClick={load} disabled={loading}>
+                            Refresh
+                        </Button>
+                    </span>
+                </Tooltip>
+            </Stack>
+
+            {/* Tabs */}
+            <Tabs value={tab} onChange={(_, v) => setTab(v)} centered sx={{ mb: 2 }}>
+                <Tab label="Pending" />
+                <Tab label="Approved" />
+                <Tab label="Rejected" />
+            </Tabs>
+
+            {/* Search */}
+            <Stack direction="row" justifyContent="center" sx={{ mb: 3 }}>
+                <TextField
+                    placeholder="Search name, email, library, city, phone"
+                    value={q}
+                    onChange={(e) => setQ(e.target.value)}
+                    size="small"
+                    sx={{
+                        width: { xs: '100%', sm: '80%', md: '60%' },
+                        '& .MuiOutlinedInput-root': {
+                            bgcolor: 'background.default',
+                        }
+                    }}
+                    InputProps={{
+                        sx: {
+                            borderRadius: 2,
+                            borderColor: theme.palette.info.main
+                        }
+                    }}
                 />
-                <CardContent>
-                    <Tabs value={tab} onChange={(_, v) => setTab(v)} sx={{ mb: 2 }}>
-                        <Tab label={`Pending`} />
-                        <Tab label={`Approved`} />
-                        <Tab label={`Rejected`} />
-                    </Tabs>
+            </Stack>
 
-                    <Stack direction="row" spacing={2} alignItems="center" sx={{ mb: 2 }}>
-                        <input
-                            type="text"
-                            placeholder="Search name, email, library, city, phone"
-                            value={q}
-                            onChange={e => setQ(e.target.value)}
-                            style={{
-                                padding: '10px',
-                                width: '60%',
-                                borderRadius: '8px',
-                                border: `1.5px solid ${theme.palette.info.main}`,
-                                background: theme.palette.background.default,
-                                color: theme.palette.primary.main,
-                                fontSize: 16,
-                                outline: 'none'
-                            }}
-                        />
-                    </Stack>
+            {/* Results info */}
+            <Box sx={{ textAlign: 'center', mb: 2 }}>
+                <Typography variant="body2" color="text.secondary">
+                    {loading ? 'Loading…' : `${filtered.length} ${STATUS[tab]} application${filtered.length === 1 ? '' : 's'}`}
+                </Typography>
+            </Box>
 
-                    <Stack spacing={2}>
-                        {filtered.length === 0 ? (
-                            <Typography color="text.secondary">{loading ? 'Loading…' : 'No applications found.'}</Typography>
-                        ) : filtered.map(app => (
-                            <Card key={app._id} variant="outlined">
+            {/* List */}
+            <Stack spacing={2}>
+                {(!loading && filtered.length === 0) ? (
+                    <Typography color="text.secondary" align="center">No applications found.</Typography>
+                ) : (
+                    filtered.map((app) => (
+                        <Fade in key={app._id}>
+                            <Card variant="outlined">
                                 <CardContent>
-                                    <Stack direction={{ xs: 'column', md: 'row' }} justifyContent="space-between" gap={2}>
-                                        <Box>
-                                            <Typography variant="h6">{app.libraryName}</Typography>
-                                            <Typography variant="body2" color="text.secondary">
+                                    <Stack
+                                        direction={{ xs: 'column', md: 'row' }}
+                                        justifyContent="space-between"
+                                        gap={2}
+                                    >
+                                        {/* Left: details */}
+                                        <Box sx={{ minWidth: 0 }}>
+                                            <Typography variant="h6" sx={{ wordBreak: 'break-word' }}>
+                                                {app.libraryName}
+                                            </Typography>
+                                            <Typography variant="body2" color="text.secondary" sx={{ wordBreak: 'break-word' }}>
                                                 {app.address1}{app.address2 ? `, ${app.address2}` : ''}, {app.city} {app.zip}
                                             </Typography>
 
                                             <Divider sx={{ my: 1.5 }} />
 
-                                            <Typography variant="body2">
+                                            <Typography variant="body2" sx={{ wordBreak: 'break-word' }}>
                                                 <strong>Applicant:</strong> {app.applicant?.firstName} {app.applicant?.lastName} · {app.applicant?.email}
                                             </Typography>
                                             <Typography variant="body2"><strong>Phone:</strong> {app.ownerPhone}</Typography>
-                                            <Typography variant="body2" sx={{ mt: 0.5 }}>
-                                                <strong>Genres:</strong> {(app.genres || []).join(', ')}
-                                            </Typography>
+                                            {Array.isArray(app.genres) && app.genres.length > 0 && (
+                                                <Typography variant="body2" sx={{ mt: 0.5 }}>
+                                                    <strong>Genres:</strong> {app.genres.join(', ')}
+                                                </Typography>
+                                            )}
                                             {app.website && (
-                                                <Typography variant="body2"><strong>Website:</strong> {app.website}</Typography>
+                                                <Typography variant="body2" sx={{ wordBreak: 'break-word' }}>
+                                                    <strong>Website:</strong> {app.website}
+                                                </Typography>
                                             )}
                                             {app.about && (
-                                                <Typography variant="body2"><strong>About:</strong> {app.about}</Typography>
+                                                <Typography variant="body2" sx={{ wordBreak: 'break-word' }}>
+                                                    <strong>About:</strong> {app.about}
+                                                </Typography>
                                             )}
-                                            <Typography variant="caption" color="text.secondary">
+                                            <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.5 }}>
                                                 Submitted: {new Date(app.createdAt).toLocaleString()}
                                             </Typography>
                                         </Box>
 
-                                        <Stack alignItems={{ xs: 'stretch', md: 'flex-end' }} spacing={1}>
+                                        {/* Right: status + actions */}
+                                        <Stack alignItems={{ xs: 'flex-start', md: 'flex-end' }} spacing={1} sx={{ flexShrink: 0 }}>
                                             <Chip
                                                 size="small"
-                                                label={app.status.toUpperCase()}
-                                                color={app.status === 'pending' ? 'warning' : app.status === 'approved' ? 'success' : 'default'}
-                                                sx={{ alignSelf: { xs: 'flex-start', md: 'flex-end' } }}
+                                                label={app.status?.toUpperCase()}
+                                                color={chipColor(app.status)}
+                                                sx={{ fontWeight: 600, letterSpacing: 0.4 }}
                                             />
                                             {tab === 0 && (
                                                 <Stack direction="row" spacing={1}>
@@ -170,10 +202,10 @@ export default function AdminLibrarianApplications() {
                                     </Stack>
                                 </CardContent>
                             </Card>
-                        ))}
-                    </Stack>
-                </CardContent>
-            </Card>
+                        </Fade>
+                    ))
+                )}
+            </Stack>
 
             {/* Confirm dialog */}
             <Dialog open={confirm.open} onClose={closeConfirm} fullWidth maxWidth="sm">
@@ -181,7 +213,7 @@ export default function AdminLibrarianApplications() {
                     {confirm.action === 'approve' ? 'Approve Application' : 'Reject Application'}
                 </DialogTitle>
                 <DialogContent dividers>
-                    {confirm.action === 'reject' && (
+                    {confirm.action === 'reject' ? (
                         <TextField
                             label="Review note (optional)"
                             fullWidth
@@ -190,8 +222,7 @@ export default function AdminLibrarianApplications() {
                             value={confirm.note}
                             onChange={e => setConfirm(s => ({ ...s, note: e.target.value }))}
                         />
-                    )}
-                    {confirm.action === 'approve' && (
+                    ) : (
                         <Typography variant="body2" color="text.secondary">
                             This will grant the applicant the <strong>librarian</strong> role and automatically create their Library.
                         </Typography>
@@ -199,13 +230,22 @@ export default function AdminLibrarianApplications() {
                 </DialogContent>
                 <DialogActions>
                     <Button onClick={closeConfirm}>Cancel</Button>
-                    <Button variant="contained" color={confirm.action === 'approve' ? 'primary' : 'error'} onClick={decide}>
+                    <Button
+                        variant="contained"
+                        color={confirm.action === 'approve' ? 'primary' : 'error'}
+                        onClick={decide}
+                    >
                         {confirm.action === 'approve' ? 'Approve' : 'Reject'}
                     </Button>
                 </DialogActions>
             </Dialog>
 
-            <Snackbar open={snack.open} autoHideDuration={2600} onClose={() => setSnack(s => ({ ...s, open: false }))}>
+            <Snackbar
+                open={snack.open}
+                autoHideDuration={2600}
+                onClose={() => setSnack(s => ({ ...s, open: false }))}
+                anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+            >
                 <Alert severity={snack.severity} onClose={() => setSnack(s => ({ ...s, open: false }))}>
                     {snack.message}
                 </Alert>
