@@ -4,10 +4,10 @@ import { useTheme } from '@mui/material/styles';
 import { admin } from '../../services/api';
 import {
     People as PeopleIcon,
-    LibraryBooks as LibraryBooksIcon,
-    Book as BookIcon,
     PendingActions as PendingIcon
 } from '@mui/icons-material';
+import LocalLibraryIcon from '@mui/icons-material/LocalLibrary';         // Libraries
+import AutoStoriesIcon from '@mui/icons-material/AutoStories';           // Books
 
 export default function AdminHome() {
     const theme = useTheme();
@@ -26,7 +26,6 @@ export default function AdminHome() {
                 setLoading(true);
                 setError(null);
 
-                // Fetch all data in parallel
                 const [usersRes, librariesRes, booksRes, requestsRes] = await Promise.all([
                     admin.listUsers(),
                     admin.listLibraries(),
@@ -110,70 +109,91 @@ export default function AdminHome() {
     }
 
     return (
-        <Box sx={{ p: 3 }}>
-            <Typography
-                variant="h3"
-                component="h1"
+        <Box
+            sx={{
+                p: 3,
+                minHeight: 'calc(100vh - 64px)', // account for top navbar
+                display: 'flex',
+                flexDirection: 'column'
+            }}
+        >
+            {/* Header */}
+            <Box sx={{ textAlign: 'center', mb: 2 }}>
+                <Typography
+                    variant="h3"
+                    component="h1"
+                    sx={{
+                        color: theme.palette.primary.main,
+                        fontWeight: 700,
+                        letterSpacing: 1,
+                        mb: 1
+                    }}
+                >
+                    Admin Dashboard
+                </Typography>
+
+                <Typography
+                    variant="h6"
+                    color="text.secondary"
+                    sx={{ maxWidth: 700, mx: 'auto' }}
+                >
+                    Welcome to the BookKeeper Admin Panel. Here's an overview of your system statistics.
+                </Typography>
+            </Box>
+
+            {/* Centered tiles */}
+            <Box
                 sx={{
-                    color: theme.palette.primary.main,
-                    fontWeight: 700,
-                    mb: 4,
-                    textAlign: 'center',
-                    letterSpacing: 1
+                    flex: 1,
+                    display: 'flex',
+                    alignItems: 'center',     // vertical center
+                    justifyContent: 'center'  // horizontal center
                 }}
             >
-                Admin Dashboard
-            </Typography>
+                <Grid
+                    container
+                    spacing={3}
+                    sx={{ width: '100%', maxWidth: 1200, mx: 'auto' }}
+                    justifyContent="center"
+                    alignItems="stretch"
+                >
+                    <Grid item xs={12} sm={6} md={3} minWidth={200} alignItems="center">
+                        <StatCard
+                            title="Total Users"
+                            value={stats.users}
+                            icon={PeopleIcon}
+                            color={theme.palette.primary.main}
+                        />
+                    </Grid>
+                    <Grid item xs={12} sm={6} md={3} minWidth={200} alignItems="center">
+                        <StatCard
+                            title="Libraries"
+                            value={stats.libraries}
+                            icon={LocalLibraryIcon}
+                            color={theme.palette.secondary.main}
+                        />
+                    </Grid>
+                    <Grid item xs={12} sm={6} md={3} minWidth={200} alignItems="center">
+                        <StatCard
+                            title="Books"
+                            value={stats.books}
+                            icon={AutoStoriesIcon}
+                            color={theme.palette.success.main}
+                        />
+                    </Grid>
+                    <Grid item xs={12} sm={6} md={3} minWidth={200} alignItems="center">
+                        <StatCard
+                            title="Pending Requests"
+                            value={stats.pendingRequests}
+                            icon={PendingIcon}
+                            color={theme.palette.warning.main}
+                        />
+                    </Grid>
+                </Grid>
+            </Box>
 
-            <Typography
-                variant="h6"
-                color="text.secondary"
-                sx={{
-                    textAlign: 'center',
-                    mb: 4,
-                    maxWidth: 600,
-                    mx: 'auto'
-                }}
-            >
-                Welcome to the BookKeeper Admin Panel. Here's an overview of your system statistics.
-            </Typography>
-
-            <Grid container spacing={3} sx={{ minWidth: 600, maxWidth: 1200, mx: 'auto', alignItems: 'center' }}>
-                <Grid item xs={12} sm={6} md={3} minWidth={200} alignItems="center">
-                    <StatCard
-                        title="Total Users"
-                        value={stats.users}
-                        icon={PeopleIcon}
-                        color={theme.palette.primary.main}
-                    />
-                </Grid>
-                <Grid item xs={12} sm={6} md={3} minWidth={200} alignItems="center">
-                    <StatCard
-                        title="Libraries"
-                        value={stats.libraries}
-                        icon={LibraryBooksIcon}
-                        color={theme.palette.secondary.main}
-                    />
-                </Grid>
-                <Grid item xs={12} sm={6} md={3} minWidth={200} alignItems="center">
-                    <StatCard
-                        title="Books"
-                        value={stats.books}
-                        icon={BookIcon}
-                        color={theme.palette.success.main}
-                    />
-                </Grid>
-                <Grid item xs={12} sm={6} md={3} minWidth={200} alignItems="center">
-                    <StatCard
-                        title="Pending Requests"
-                        value={stats.pendingRequests}
-                        icon={PendingIcon}
-                        color={theme.palette.warning.main}
-                    />
-                </Grid>
-            </Grid>
-
-            <Box sx={{ mt: 6, textAlign: 'center' }}>
+            {/* Footer hint */}
+            <Box sx={{ mt: 3, textAlign: 'center' }}>
                 <Typography variant="body2" color="text.secondary">
                     Use the navigation menu on the left to manage different aspects of the system.
                 </Typography>

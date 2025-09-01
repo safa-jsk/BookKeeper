@@ -1,5 +1,8 @@
-import React from 'react';
-import { Card, CardContent, CardMedia, Typography, Button, Stack, IconButton, Tooltip, Chip, Box } from '@mui/material';
+import React, { useState } from 'react';
+import {
+    Card, CardContent, CardMedia, Typography, Button, Stack, IconButton, Tooltip, Chip, Box,
+    Snackbar, Alert
+} from '@mui/material';
 import AddShoppingCartIcon from '@mui/icons-material/AddShoppingCart';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import { addCartItem } from '../services/api';
@@ -13,17 +16,36 @@ export const getConfidenceColor = (confidence) => {
     return 'default';
 };
 
-export default function BookCard({ book, onRemove, onReview, onAddToFinished, onAddedToCart, onWantToRead, height = 420 }) {
+export default function BookCard({
+    book,
+    onRemove,
+    onReview,
+    onAddToFinished,
+    onAddedToCart,
+    onWantToRead,
+    height = 420
+}) {
     const theme = useTheme();
+    const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
 
-    // Check if the user is logged in (e.g., by checking for a valid token)
-    const isLoggedIn = Boolean(localStorage.getItem('token')); // You can replace this with your auth state logic
+    // Check if the user is logged in
+    const isLoggedIn = Boolean(localStorage.getItem('token'));
+
+    const handleAddToCart = async () => {
+        try {
+            await addCartItem(book._id, 1);
+            onAddedToCart && onAddedToCart(book);
+            setSnackbar({ open: true, message: 'Added to cart', severity: 'success' });
+        } catch (e) {
+            setSnackbar({ open: true, message: 'Failed to add to cart', severity: 'error' });
+        }
+    };
 
     return (
         <Card
             sx={{
                 width: 250,
-                height: height,
+                height,
                 display: 'flex',
                 flexDirection: 'column',
                 borderRadius: 3,
@@ -39,7 +61,7 @@ export default function BookCard({ book, onRemove, onReview, onAddToFinished, on
                 }
             }}
         >
-            {/* Show the Cart icon only if logged in */}
+            {/* Cart icon (only if logged in) */}
             {isLoggedIn && (
                 <Box
                     sx={{
@@ -60,12 +82,7 @@ export default function BookCard({ book, onRemove, onReview, onAddToFinished, on
                         <IconButton
                             size="small"
                             color="primary"
-                            onClick={async () => {
-                                try {
-                                    await addCartItem(book._id, 1);
-                                    onAddedToCart && onAddedToCart(book);
-                                } catch (_) { }
-                            }}
+                            onClick={handleAddToCart}
                             sx={{ zIndex: 1, p: '4px' }}
                         >
                             <AddShoppingCartIcon fontSize="medium" />
@@ -85,7 +102,7 @@ export default function BookCard({ book, onRemove, onReview, onAddToFinished, on
                     background: theme.palette.background.paper
                 }}
                 onError={(e) => {
-                    e.target.src = '/images/books/harry-potter-and-the-philosophers-stone.jpg';
+                    e.currentTarget.src = '/images/books/harry-potter-and-the-philosophers-stone.jpg';
                 }}
             />
 
@@ -199,6 +216,21 @@ export default function BookCard({ book, onRemove, onReview, onAddToFinished, on
                     )
                 )}
             </Stack>
+
+            {/* Snackbar */}
+            <Snackbar
+                open={snackbar.open}
+                autoHideDuration={2600}
+                onClose={() => setSnackbar(s => ({ ...s, open: false }))}
+                anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+            >
+                <Alert
+                    severity={snackbar.severity}
+                    onClose={() => setSnackbar(s => ({ ...s, open: false }))}
+                >
+                    {snackbar.message}
+                </Alert>
+            </Snackbar>
         </Card>
     );
 }

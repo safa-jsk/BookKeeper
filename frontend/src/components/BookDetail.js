@@ -212,7 +212,7 @@ function BookDetail() {
           </Stack>
 
           <Typography variant="body1" sx={{ mt: 1 }}>
-            <strong>Year:</strong> {book.year}
+            <strong>Published Year:</strong> {book.year}
           </Typography>
 
           <Divider sx={{ my: 3 }} />
