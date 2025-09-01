@@ -81,13 +81,13 @@ export default function Navbar({ user, onLogout }) {
       <Container maxWidth="xl">
         <Toolbar disableGutters sx={{ minHeight: 72 }}>
           <Box component={Link} to="/" sx={{ display: 'flex', alignItems: 'center', textDecoration: 'none', mr: 3 }}>
-            <img src="/images/logo_w.png" alt="BookKeeper" style={{ height: 44, objectFit: 'contain' }} />
+            <img src="/images/logo_white.png" alt="BookKeeper" style={{ height: 44, objectFit: 'contain' }} />
           </Box>
 
           <Box sx={{ flexGrow: 1, display: 'flex', gap: 2 }}>
-            <Button color="inherit" component={Link} to="/browse" sx={{ textTransform: 'none' }}>Browse Books</Button>
-            <Button color="inherit" component={Link} to="/trending" sx={{ textTransform: 'none' }}>Trending</Button>
-            <Button color="inherit" component={Link} to="/map" sx={{ textTransform: 'none' }}>Libraries Near Me</Button>
+            <Button color="inherit" component={Link} to="/browse" sx={{ textTransform: 'none', fontSize: 16 }}>Browse Books</Button>
+            <Button color="inherit" component={Link} to="/trending" sx={{ textTransform: 'none', fontSize: 16 }}>Trending</Button>
+            <Button color="inherit" component={Link} to="/map" sx={{ textTransform: 'none', fontSize: 16 }}>Libraries Near Me</Button>
           </Box>
 
           {/* User dropdown */}
